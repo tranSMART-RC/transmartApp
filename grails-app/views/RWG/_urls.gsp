@@ -77,4 +77,7 @@ var resetNodesRwgURL = "${createLink([controller:'RWG', action:'resetOpenedNodes
 var addNodeDseURL = "${createLink([controller:'RWG', action:'addOpenedNodeDSE'])}";
 var removeNodeDseURL = "${createLink([controller:'RWG', action:'removeOpenedNodeDSE'])}";
 
+var uploadFilesURL = "${createLink([controller:'uploadFiles',action:'displayUpload'])}";
+var uploadActionURL = "${createLink([controller:'uploadFiles',action:'upload'])}"; 
+
 </script>

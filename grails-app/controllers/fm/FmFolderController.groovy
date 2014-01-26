@@ -32,6 +32,7 @@ import com.recomdata.export.ExportRowNew
 import com.recomdata.export.ExportTableNew
 import com.recomdata.util.FolderType
 import de.DeMrnaAnnotation
+import fr.sanofi.transmart.mongo.MongoUtils;
 import grails.converters.JSON
 import grails.converters.XML
 import grails.validation.ValidationException
@@ -43,6 +44,15 @@ import org.slf4j.LoggerFactory
 import search.SearchKeyword
 
 import javax.activation.MimetypesFileTypeMap
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+import com.mongodb.Mongo
+import com.mongodb.DB
+import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSDBFile;
+import groovyx.net.http.ContentType;
+import groovyx.net.http.HTTPBuilder;
+import groovyx.net.http.Method;
 
 class FmFolderController {
 
@@ -965,6 +975,7 @@ class FmFolderController {
         }
 
         log.debug "FolderInstance = ${bioDataObject}"
+        def useMongo=grailsApplication.config.fr.sanofi.mongoFiles.enableMongo
         render template: '/fmFolder/folderDetail',
                 model: [
                         folder: folder,
@@ -977,7 +988,8 @@ class FmFolderController {
                         metaDataTagItems: metaDataTagItems,
                         jSONForGrids: jSONForGrids,
                         subjectLevelDataAvailable: subjectLevelDataAvailable,
-                        searchHighlight: searchHighlight
+                        searchHighlight: searchHighlight,
+                        useMongo: useMongo
                 ]
     }
 
@@ -1274,8 +1286,11 @@ class FmFolderController {
         def file = FmFile.get(id)
         def folder = file.getFolder()
         if (file) {
-            fmFolderService.deleteFile(file)
-            render(template: 'filesTable', model: [folder: folder, hlFileIds: []])
+            if(fmFolderService.deleteFile(file)){
+                render(template: 'filesTable', model: [folder: folder, hlFileIds: []])
+            }else{
+                render(status: 500, text: "Error when deleting file. Please contact an administrator")
+            }
         } else {
             render(status: 404, text: "FmFile not found")
         }
@@ -1292,21 +1307,41 @@ class FmFolderController {
         String mimeType = MIME_TYPES_FILES_MAP.getContentType fmFile.originalName
         log.debug "Downloading file $fmFile, mime type $mimeType"
 
-        response.setContentType mimeType
+        HttpServletResponse fileReponse=new HttpServletResponseWrapper(response)
+        fileReponse.setContentType mimeType
 
         /* This form of sending the filename seems to be compatible
          * with all major browsers, except for IE8. See:
          * http://greenbytes.de/tech/tc2231/#attwithfn2231utf8comp
          */
-        response.addHeader 'Content-Disposition',
+        fileReponse.addHeader 'Content-Disposition',
                 "attachment; filename*=UTF-8''" +
                         fmFile.originalName.getBytes('UTF-8').collect {
                             '%' + String.format('%02x', it)
                         }.join('')
-        response.addHeader 'Content-length', fmFile.fileSize.toString()
-        def file = fmFolderService.getFile fmFile
-        file.newInputStream().withStream {
-            response.outputStream << it
+        fileReponse.addHeader 'Content-length', fmFile.fileSize.toString()
+        
+        def useMongo=grailsApplication.config.fr.sanofi.mongoFiles.enableMongo
+        if(!useMongo){
+            def file = fmFolderService.getFile fmFile
+            file.newInputStream().withStream {
+                response.outputStream << it
+            }
+        }else{
+            def apiURL=grailsApplication.config.fr.sanofi.mongoFiles.apiURL
+            def apiKey=grailsApplication.config.fr.sanofi.mongoFiles.apiKey
+            def http = new HTTPBuilder(apiURL+fmFile.filestoreName+"/fsfile")
+            http.request( Method.GET, ContentType.BINARY) { req ->
+                headers.'apikey' = MongoUtils.hash(apiKey)
+                response.success = { resp, binary ->
+                    assert resp.statusLine.statusCode == 200
+                    fileReponse.outputStream << binary
+                }
+                response.failure = { resp ->
+                    log.error("Problem during connection to API: "+resp.status)
+                    render(contentType: "text/plain", text: "Error writing ZIP: File not found")
+                }
+            }
         }
     }
 
