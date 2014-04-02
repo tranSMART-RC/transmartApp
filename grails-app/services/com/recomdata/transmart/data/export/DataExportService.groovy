@@ -173,7 +173,7 @@ class DataExportService {
                                     }
                                 }
                                 break;
-                            case "MRNA.CEL":
+                            case "mrna.CEL":
                                 geneExpressionDataService.downloadCELFiles(resultInstanceIdMap[subset], studyList, studyDir, jobDataMap.get("jobName"), null, null, null, null)
                                 break;
                             case "GSEA.GCT & .CLS":

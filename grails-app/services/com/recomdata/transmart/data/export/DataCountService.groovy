@@ -65,7 +65,7 @@ class DataCountService {
         mrnaCelQuery.append("SELECT count(distinct s.patient_id) FROM de_subject_sample_mapping s ")
                 .append("INNER JOIN bio_content b on s.trial_name = b.study_name ")
                 .append("WHERE s.patient_id IN (").append(subjectsQuery).append(") AND s.platform='MRNA_AFFYMETRIX' AND s.assay_id IS NOT NULL ")
-                .append("AND b.cel_location IS NOT NULL AND s.sample_cd IS NOT NULL")
+                .append("AND b.cel_location IS NOT NULL AND s.sample_cd = b.file_name")
 
         //Build the query we use to get the clinical data. patient_num should be unique across all studies.
         clinicalQuery.append("SELECT count(distinct obsf.patient_num) FROM observation_fact obsf WHERE obsf.patient_num IN (")
@@ -79,10 +79,10 @@ class DataCountService {
         snpQuery.append("SELECT count(distinct snp.patient_num) FROM de_subject_snp_dataset snp WHERE snp.patient_num IN (")
                 .append(subjectsQuery).append(")");
 
-        snpCelQuery.append("""SELECT count(DISTINCT ssd.patient_num)
-							FROM de_subject_snp_dataset ssd 
-							INNER JOIN bio_content b ON b.study_name = ssd.trial_name
-							WHERE ssd.patient_num IN (""").append(subjectsQuery).append(")");
+        snpCelQuery.append("SELECT count(distinct s.patient_id) FROM de_subject_sample_mapping s ")
+                .append("INNER JOIN bio_content b on s.trial_name = b.study_name ")
+                .append("WHERE s.patient_id IN (").append(subjectsQuery).append(") AND s.platform='SNP' AND s.assay_id IS NOT NULL ")
+                .append("AND b.cel_location IS NOT NULL AND s.sample_cd = b.file_name")
 
         //Build the query we use to get Additional Data. patient_id should be unique to a given study for each patient.
         //We count the distinct ID's with additional data. TODO:change != to "ADDTIONAL" or something like that

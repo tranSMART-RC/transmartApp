@@ -42,7 +42,7 @@ class DataExportController {
 
         def legacyMetaData = exportService.getLegacyHighDimensionMetaData(resultInstanceId1, resultInstanceId2)
 
-        metadata.exportMetaData.addAll(legacyMetaData)
+		mergeMetadata(metadata.exportMetaData, legacyMetaData)
 		
         render metadata as JSON
     }
@@ -242,6 +242,30 @@ class DataExportController {
         response.setContentType("text/json")
         response.outputStream << jsonResult.toString() 
     }
+	
+	/**
+	 * Method that will merge two metadata objects based on the data type
+	 * Used to merge legacy metadata (including mRNA CEL metadata) and high dimension metadata
+	 */
+	def mergeMetadata(metadata1, metadata2){
+		for(def row2 in metadata2){
+			def isPresent=false
+			def row
+			for(row1 in metadata1){
+				if(row2.dataTypeId.toUpperCase() == row1.dataTypeId.toUpperCase()){
+					isPresent=true
+					row=row1
+					break
+				}
+			}
+			if(isPresent){
+				row.subset1.addAll(row2.subset1)
+				row.subset2.addAll(row2.subset2) 
+			}else{
+				metadata1.add(row2)
+			}
+		}
+	}
 }
 
 
