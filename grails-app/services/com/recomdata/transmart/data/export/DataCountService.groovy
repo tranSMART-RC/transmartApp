@@ -20,7 +20,10 @@
 
 package com.recomdata.transmart.data.export
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.StringUtils
+import org.transmartproject.db.i2b2data.ObservationFact
+import org.transmartproject.db.querytool.QtPatientSetCollection
+import org.transmartproject.db.querytool.QtQueryResultInstance
 
 class DataCountService {
 
@@ -62,7 +65,7 @@ class DataCountService {
         mrnaCelQuery.append("SELECT count(distinct s.patient_id) FROM de_subject_sample_mapping s ")
                 .append("INNER JOIN bio_content b on s.trial_name = b.study_name ")
                 .append("WHERE s.patient_id IN (").append(subjectsQuery).append(") AND s.platform='MRNA_AFFYMETRIX' AND s.assay_id IS NOT NULL ")
-                .append("AND b.cel_location IS NOT NULL AND s.sample_cd IS NOT NULL")
+                .append("AND b.cel_location IS NOT NULL AND s.sample_cd = b.file_name")
 
         //Build the query we use to get the clinical data. patient_num should be unique across all studies.
         clinicalQuery.append("SELECT count(distinct obsf.patient_num) FROM observation_fact obsf WHERE obsf.patient_num IN (")
@@ -76,10 +79,10 @@ class DataCountService {
         snpQuery.append("SELECT count(distinct snp.patient_num) FROM de_subject_snp_dataset snp WHERE snp.patient_num IN (")
                 .append(subjectsQuery).append(")");
 
-        snpCelQuery.append("""SELECT count(DISTINCT ssd.patient_num)
-							FROM de_subject_snp_dataset ssd 
-							INNER JOIN bio_content b ON b.study_name = ssd.trial_name
-							WHERE ssd.patient_num IN (""").append(subjectsQuery).append(")");
+        snpCelQuery.append("SELECT count(distinct s.patient_id) FROM de_subject_sample_mapping s ")
+                .append("INNER JOIN bio_content b on s.trial_name = b.study_name ")
+                .append("WHERE s.patient_id IN (").append(subjectsQuery).append(") AND s.platform='SNP' AND s.assay_id IS NOT NULL ")
+                .append("AND b.cel_location IS NOT NULL AND s.sample_cd = b.file_name")
 
         //Build the query we use to get Additional Data. patient_id should be unique to a given study for each patient.
         //We count the distinct ID's with additional data. TODO:change != to "ADDTIONAL" or something like that
@@ -127,6 +130,44 @@ class DataCountService {
 
         return resultMap
     }
+	
+	/**
+	 * Returns the number of patients within a given subset that has clinical data
+	 * @param resultInstanceId
+	 * @return	The number of patients within the given subset that have clinical data
+	 */
+	Long getClinicalDataCount( Long resultInstanceId ) {
+		// TODO: Convert this into using 
+		if( !resultInstanceId ) 
+			return 0
+		
+		def resultInstance = QtQueryResultInstance.get( resultInstanceId )
+		
+		if( !resultInstance )
+			return 0
+			
+		// Determine the patients to query. This has a few where clauses:
+		//		- match the selected subset
+		//		- sourceSystemCd should not contain :S:
+		def patientNums = QtPatientSetCollection.executeQuery( "SELECT q.patient.id FROM QtPatientSetCollection q WHERE q.resultInstance.id = ? AND q.patient.sourcesystemCd NOT LIKE '%:S:%'", resultInstanceId )
+		println "PATIENTNUMS: " + patientNums
+		
+		if( !patientNums ) 
+			return 0
+		
+		// Find all low dimensional observations
+		// TODO: Include a check on only low dimensional data, by looking
+		//		 at the visual attributes of the concept
+		def rows = ObservationFact.createCriteria().list {
+			projections {
+				groupProperty("patient")
+				countDistinct("patient")
+			}
+			'in'( 'patient.id', patientNums )
+		}
+		
+		rows.size()
+	}
 
 
     def getCountFromDB(String commandString, String rID = null) {
