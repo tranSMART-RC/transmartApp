@@ -43,7 +43,9 @@ import groovyx.net.http.Method;
 
 import com.mongodb.Mongo
 import com.mongodb.DB
+import com.mongodb.MongoClient;
 import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSDBFile
 
 class FmFolderService {
 
@@ -380,34 +382,55 @@ class FmFolderService {
     
                 postTool.execute();
             }else{
-                def apiURL=config.fr.sanofi.mongoFiles.apiURL
-                def apiKey=config.fr.sanofi.mongoFiles.apiKey
-                def http = new HTTPBuilder(apiURL+fmFile.filestoreName+"/fsfile")
-                url.append("&commit=true")
-                http.request( Method.GET, ContentType.BINARY) { req ->
-                    headers.'apikey' = MongoUtils.hash(apiKey)
-                    response.success = { resp, binary ->
-                        assert resp.statusLine.statusCode == 200
-                        def inputStream=binary
-    
-                        def http2 = new HTTPBuilder(url)
-                        http2.request(Method.POST) {request ->
-                            requestContentType: "multipart/form-data"
-                            MultipartEntity multiPartContent = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE)
-                            multiPartContent.addPart(fmFile.filestoreName, new InputStreamBody(inputStream, "application/octet-stream", fmFile.originalName))
-                            request.setEntity(multiPartContent)
-                            response.success = { resp2 ->
-                                log.info("File successfully indexed: "+fmFile.id)
-                            }
-                             
-                            response.failure = { resp2 ->
-                                log.error("Problem to index file "+fmFile.id+": "+resp.status)
-                            }
-                        }
-                    }
-                    response.failure = { resp ->
-                        log.error("Problem during connection to API: "+resp.status)
-                    }
+				if(config.fr.sanofi.mongoFiles.useDriver){
+					MongoClient mongo = new MongoClient(config.fr.sanofi.mongoFiles.dbServer, config.fr.sanofi.mongoFiles.dbPort)
+					DB db = mongo.getDB(config.fr.sanofi.mongoFiles.dbName)
+					GridFS gfs = new GridFS(db)
+					def http = new HTTPBuilder(url)
+					GridFSDBFile gfsFile = gfs.findOne(fmFile.filestoreName)
+					http.request(Method.POST) {request ->
+						requestContentType: "multipart/form-data"
+						MultipartEntity multiPartContent = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE)
+						multiPartContent.addPart(fmFile.filestoreName, new InputStreamBody(gfsFile.getInputStream(), "application/octet-stream", fmFile.originalName))
+						request.setEntity(multiPartContent)
+						response.success = { resp ->
+							log.info("File successfully indexed: "+fmFile.id)
+						}
+						response.failure = { resp ->
+							log.error("Problem to index file "+fmFile.id+": "+resp.status)
+						}
+					}
+					mongo.close()
+				}else{
+	                def apiURL=config.fr.sanofi.mongoFiles.apiURL
+	                def apiKey=config.fr.sanofi.mongoFiles.apiKey
+	                def http = new HTTPBuilder(apiURL+fmFile.filestoreName+"/fsfile")
+	                url.append("&commit=true")
+	                http.request( Method.GET, ContentType.BINARY) { req ->
+	                    headers.'apikey' = MongoUtils.hash(apiKey)
+	                    response.success = { resp, binary ->
+	                        assert resp.statusLine.statusCode == 200
+	                        def inputStream=binary
+	    
+	                        def http2 = new HTTPBuilder(url)
+	                        http2.request(Method.POST) {request ->
+	                            requestContentType: "multipart/form-data"
+	                            MultipartEntity multiPartContent = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE)
+	                            multiPartContent.addPart(fmFile.filestoreName, new InputStreamBody(inputStream, "application/octet-stream", fmFile.originalName))
+	                            request.setEntity(multiPartContent)
+	                            response.success = { resp2 ->
+	                                log.info("File successfully indexed: "+fmFile.id)
+	                            }
+	                             
+	                            response.failure = { resp2 ->
+	                                log.error("Problem to index file "+fmFile.id+": "+resp.status)
+	                            }
+	                        }
+	                    }
+	                    response.failure = { resp ->
+	                        log.error("Problem during connection to API: "+resp.status)
+	                    }
+	                }
                 }
             
             }
@@ -473,25 +496,34 @@ class FmFolderService {
         def deleted = false 
         try {
             if(config.fr.sanofi.mongoFiles.enableMongo){
-                def apiURL = config.fr.sanofi.mongoFiles.apiURL
-                def apiKey = config.fr.sanofi.mongoFiles.apiKey
-                def http = new HTTPBuilder( apiURL+file.filestoreName+"/delete" )
-                http.request(Method.GET) { req ->
-                    headers.'apikey' = MongoUtils.hash(apiKey)
-                    headers.'User-Agent' = "Mozilla/5.0 Firefox/3.0.4"
-                    response.success = { resp ->
-                        if(resp.statusLine.statusCode == 200){
-                            log.info("File deleted: "+file.filestoreName)
-                            deleted = true
-                        }else{
-                            log.error("Error when deleting file: "+file.filestoreName)
-                        }
-                      }
-                      
-                      response.failure = { resp ->
-                          log.error("Error when deleting file: "+resp.status)
-                      }
-                }
+				if(config.fr.sanofi.mongoFiles.useDriver){
+					MongoClient mongo = new MongoClient(config.fr.sanofi.mongoFiles.dbServer, config.fr.sanofi.mongoFiles.dbPort)
+					DB db = mongo.getDB( config.fr.sanofi.mongoFiles.dbName)
+					GridFS gfs = new GridFS(db)
+					gfs.remove(file.filestoreName)
+					mongo.close()
+					deleted=true
+				}else{
+	                def apiURL = config.fr.sanofi.mongoFiles.apiURL
+	                def apiKey = config.fr.sanofi.mongoFiles.apiKey
+	                def http = new HTTPBuilder( apiURL+file.filestoreName+"/delete" )
+	                http.request(Method.GET) { req ->
+	                    headers.'apikey' = MongoUtils.hash(apiKey)
+	                    headers.'User-Agent' = "Mozilla/5.0 Firefox/3.0.4"
+	                    response.success = { resp ->
+	                        if(resp.statusLine.statusCode == 200){
+	                            log.info("File deleted: "+file.filestoreName)
+	                            deleted = true
+	                        }else{
+	                            log.error("Error when deleting file: "+file.filestoreName)
+	                        }
+	                      }
+	                      
+	                      response.failure = { resp ->
+	                          log.error("Error when deleting file: "+resp.status)
+	                      }
+	                }
+				}
             }else{
                 File filestoreFile = new File(filestoreDirectory + file.filestoreLocation + File.separator + file.filestoreName)
                 if (filestoreFile.exists()) {

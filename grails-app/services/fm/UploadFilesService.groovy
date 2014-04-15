@@ -25,6 +25,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
+import com.mongodb.MongoClient
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSInputFile;
 
@@ -55,9 +56,6 @@ class UploadFilesService {
             def fileName = fileToUpload.getOriginalFilename().toString()
             def fileType = fileName.split("\\.", -1)[fileName.split("\\.",-1).length-1]
             def fileSize = fileToUpload.getSize()
-    
-            def apiURL = Holders.config.fr.sanofi.mongoFiles.apiURL
-            def apiKey = Holders.config.fr.sanofi.mongoFiles.apiKey
             
             //create fmfile
             FmFolder fmFolder;
@@ -113,32 +111,46 @@ class UploadFilesService {
                 return "Loading failed";
              }
     
-            //use API to upload file
-            def http = new HTTPBuilder( apiURL+"insert/"+fmFile.filestoreName )
-            http.request(Method.POST) {request ->
-                headers.'apikey' = MongoUtils.hash(apiKey)
-                requestContentType: "multipart/form-data"
-                MultipartEntity multiPartContent = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE)
-                multiPartContent.addPart(fmFile.filestoreName, new InputStreamBody(fileToUpload.inputStream, fileToUpload.contentType, fileToUpload.originalFilename))
-                 
-                request.setEntity(multiPartContent)
-                 
-                  response.success = { resp ->
-                    if(resp.status < 400){
-                        fmFolderService.indexFile(fmFile);
-                        log.info("File successfully loaded: "+fmFile.id)
-                        return "File successfully loaded"
-                    }
-                  }
-                 
-                  response.failure = { resp ->
-                      log.error("Problem during connection to API: "+resp.status)
-                      if(fmFile!=null) fmFile.delete()
-                        if(resp.status ==404){
-                            return "Problem during connection to API"
-                        }
-                        return "Loading failed"
-                  }
+			if(Holders.config.fr.sanofi.mongoFiles.useDriver){
+				MongoClient mongo = new MongoClient(Holders.config.fr.sanofi.mongoFiles.dbServer, Holders.config.fr.sanofi.mongoFiles.dbPort)
+				DB db = mongo.getDB( Holders.config.fr.sanofi.mongoFiles.dbName)
+				GridFS gfs = new GridFS(db)
+				GridFSInputFile file=gfs.createFile(fileToUpload.inputStream, fmFile.filestoreName)
+				file.setContentType(fileToUpload.contentType)
+				file.save()
+				mongo.close()	
+				fmFolderService.indexFile(fmFile);
+				log.info("File successfully loaded: "+fmFile.id)
+				return "File successfully loaded"
+			}else{
+				def apiURL = Holders.config.fr.sanofi.mongoFiles.apiURL
+				def apiKey = Holders.config.fr.sanofi.mongoFiles.apiKey
+	            def http = new HTTPBuilder( apiURL+"insert/"+fmFile.filestoreName )
+	            http.request(Method.POST) {request ->
+	                headers.'apikey' = MongoUtils.hash(apiKey)
+	                requestContentType: "multipart/form-data"
+	                MultipartEntity multiPartContent = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE)
+	                multiPartContent.addPart(fmFile.filestoreName, new InputStreamBody(fileToUpload.inputStream, fileToUpload.contentType, fileToUpload.originalFilename))
+	                 
+	                request.setEntity(multiPartContent)
+	                 
+	                  response.success = { resp ->
+	                    if(resp.status < 400){
+	                        fmFolderService.indexFile(fmFile);
+	                        log.info("File successfully loaded: "+fmFile.id)
+	                        return "File successfully loaded"
+	                    }
+	                  }
+	                 
+	                  response.failure = { resp ->
+	                      log.error("Problem during connection to API: "+resp.status)
+	                      if(fmFile!=null) fmFile.delete()
+	                        if(resp.status ==404){
+	                            return "Problem during connection to API"
+	                        }
+	                        return "Loading failed"
+	                  }
+	            }
             }
         }catch(Exception e){
             log.error("transfer error: "+e.toString())

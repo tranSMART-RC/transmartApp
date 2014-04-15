@@ -48,6 +48,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import com.mongodb.Mongo
 import com.mongodb.DB
+import com.mongodb.MongoClient
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import groovyx.net.http.ContentType;
@@ -1328,19 +1329,28 @@ class FmFolderController {
                 response.outputStream << it
             }
         }else{
-            def apiURL=grailsApplication.config.fr.sanofi.mongoFiles.apiURL
-            def apiKey=grailsApplication.config.fr.sanofi.mongoFiles.apiKey
-            def http = new HTTPBuilder(apiURL+fmFile.filestoreName+"/fsfile")
-            http.request( Method.GET, ContentType.BINARY) { req ->
-                headers.'apikey' = MongoUtils.hash(apiKey)
-                response.success = { resp, binary ->
-                    assert resp.statusLine.statusCode == 200
-                    fileReponse.outputStream << binary
-                }
-                response.failure = { resp ->
-                    log.error("Problem during connection to API: "+resp.status)
-                    render(contentType: "text/plain", text: "Error writing ZIP: File not found")
-                }
+			if(grailsApplication.config.fr.sanofi.mongoFiles.useDriver){
+				MongoClient mongo = new MongoClient(grailsApplication.config.fr.sanofi.mongoFiles.dbServer, grailsApplication.config.fr.sanofi.mongoFiles.dbPort)
+				DB db = mongo.getDB( grailsApplication.config.fr.sanofi.mongoFiles.dbName)
+				GridFS gfs = new GridFS(db)
+				GridFSDBFile gfsFile = gfs.findOne(fmFile.filestoreName)
+				fileReponse.outputStream << gfsFile.getInputStream()
+				mongo.close()
+			}else {
+	            def apiURL=grailsApplication.config.fr.sanofi.mongoFiles.apiURL
+	            def apiKey=grailsApplication.config.fr.sanofi.mongoFiles.apiKey
+	            def http = new HTTPBuilder(apiURL+fmFile.filestoreName+"/fsfile")
+	            http.request( Method.GET, ContentType.BINARY) { req ->
+	                headers.'apikey' = MongoUtils.hash(apiKey)
+	                response.success = { resp, binary ->
+	                    assert resp.statusLine.statusCode == 200
+	                    fileReponse.outputStream << binary
+	                }
+	                response.failure = { resp ->
+	                    log.error("Problem during connection to API: "+resp.status)
+	                    render(contentType: "text/plain", text: "Error writing ZIP: File not found")
+	                }
+	            }
             }
         }
     }
