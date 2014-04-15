@@ -103,11 +103,10 @@ class DataExportService {
                 if (null != resultInstanceIdMap[subset] && !resultInstanceIdMap[subset].isEmpty()) {
                     // Construct a list of the URL objects we're running, submitted to the pool
                     selectedFilesList.each() { selectedFile ->
-
+							
                         if (StringUtils.equalsIgnoreCase(selectedFile, "CLINICAL.TXT")) {
                             writeClinicalData = true
                         }
-
                         println 'Working on to export File :: ' + selectedFile
                         def List gplIds = subsetSelectedPlatformsByFiles?.get(subset)?.get(selectedFile)
                         def retVal = null
@@ -118,7 +117,7 @@ class DataExportService {
                                 break;
                             // New high dimensional data
                             // case "MRNA.TXT":
-                            case highDimensionResourceService.knownTypes:
+                            case highDimensionResourceService.knownTypes.collect { type -> type + ".TXT" }:
                                 //retVal = geneExpressionDataService.getData(studyList, studyDir, "mRNA.trans", jobDataMap.get("jobName"), resultInstanceIdMap[subset], pivotData, gplIds, null, null, null, null, false)
 
                                 // boolean splitAttributeColumn
@@ -126,11 +125,12 @@ class DataExportService {
                                 // List<String> conceptPaths
                                 // String dataType
                                 // String studyDir
+								String dataType=selectedFile.replace(".TXT", "") 
                                 retVal = highDimExportService.exportHighDimData(jobName: jobDataMap.jobName,
                                                                                 splitAttributeColumn: false,
                                                                                 resultInstanceId: resultInstanceIdMap[subset],
-                                                                                conceptPaths: selection[subset][selectedFile].selector,
-                                                                                dataType: selectedFile,
+                                                                                conceptPaths: selection[subset][dataType].selector,
+                                                                                dataType: dataType,
                                                                                 studyDir: studyDir,
                                                                                 )
                                 //filesDoneMap is used for building the Clinical Data query

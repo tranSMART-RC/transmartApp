@@ -145,7 +145,7 @@ class DataExportController {
 				
 				subset1: [
 					[
-						fileType: "TXT",
+						fileType: ".TXT",
 						dataTypeHasCounts: true,
 						dataFormat: "Data",
 						fileDataCount: highDimRow.subset1 ? highDimRow.subset1.size() : 0,
@@ -154,7 +154,7 @@ class DataExportController {
 				],
 				subset2:[
 					[
-						fileType: "TXT",
+						fileType: ".TXT",
 						dataTypeHasCounts: true,
 						dataFormat: "Data",
 						fileDataCount: highDimRow.subset2 ? highDimRow.subset2.size() : 0,
