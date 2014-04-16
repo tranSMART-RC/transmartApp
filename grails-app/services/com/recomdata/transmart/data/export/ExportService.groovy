@@ -250,7 +250,12 @@ class ExportService {
             if (checkboxItemArray.size() > 1) {
                 //Second item is the data type.
                 String currentDataType = checkboxItemArray[1].trim()
-                if (checkboxItemArray.size() > 3) {
+                if (checkboxItemArray.size() > 4) {
+                    def jobDataType = currentDataType + "_"+ checkboxItemArray[2].trim() + checkboxItemArray[3].trim()
+                    if (!subsetSelectedFilesMap.get(currentSubset)?.contains(jobDataType)) {
+                        subsetSelectedFilesMap.get(currentSubset).push(jobDataType)
+                    }
+                } else if (checkboxItemArray.size() > 3) {
                     def jobDataType = currentDataType + checkboxItemArray[2].trim()
                     if (!subsetSelectedFilesMap.get(currentSubset)?.contains(jobDataType)) {
                         subsetSelectedFilesMap.get(currentSubset).push(jobDataType)
