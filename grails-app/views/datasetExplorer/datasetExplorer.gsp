@@ -82,9 +82,12 @@
 	<!-- Include JQuery stylesheets here: -->
     <link rel="stylesheet" href="${resource(dir:'css/jquery/ui', file:'jquery-ui-1.9.1.custom.css')}"></link>        
     <link rel="stylesheet" href="${resource(dir:'css/jquery/skin', file:'ui.dynatree.css')}"></link>      
+	<link rel="stylesheet" type="text/css" href="${resource(dir:'css', file:'metacore.css')}">
 	
+    <script type="text/javascript" src="${resource(dir:'js/raphael', file:'raphael-min.js')}"></script>
+    <script type="text/javascript" src="${resource(dir:'js/metacore', file:'metacoreEnrichment.js')}"></script>
+    <script type="text/javascript" src="${resource(dir:'js/metacore', file:'metacoreEnrichmentDisplay.js')}"></script>
 	<script type="text/javascript" src="${resource(dir:'js', file:'browserDetect.js')}"></script>
-	
 
     <!--<link rel="stylesheet" href="${resource(dir:'css', file:'main.css')}"></link>    -->
 	<link rel="stylesheet" type="text/css" href="${resource(dir:'css', file:'datasetExplorer.css')}">
@@ -154,7 +157,9 @@
 	  HighDimDataType: '',
 	  SNPType: '',
 	  basePath: pageInfo.basePath,
-	  hideAcrossTrialsPanel:'${grailsApplication.config.com.recomdata.datasetExplorer.hideAcrossTrialsPanel}'
+	  hideAcrossTrialsPanel:'${grailsApplication.config.com.recomdata.datasetExplorer.hideAcrossTrialsPanel}',
+	  metacoreAnalyticsEnabled: '${grailsApplication.config.com.thomsonreuters.transmart.metacoreAnalyticsEnable}',
+	  metacoreUrl: '${grailsApplication.config.com.thomsonreuters.transmart.metacoreURL}'
 	};
 	// initialize browser version variables; see http://www.quirksmode.org/js/detect.html
 	BrowserDetect.init();
@@ -172,7 +177,7 @@
 	<tmpl:/RWG/urls />
 	
 	<script type="text/javascript" src="${resource(dir:'js/datasetExplorer', file:'highDimensionData.js')}"></script>
-		<script type="text/javascript" src="${resource(dir:'js', file:'utilitiesMenu.js')}"></script>
+	<script type="text/javascript" src="${resource(dir:'js', file:'utilitiesMenu.js')}"></script>
 		
 	<!-- Combo-handled YUI JS files: --> 
 	<script type="text/javascript" src="http://yui.yahooapis.com/combo?2.9.0/build/yahoo/yahoo-min.js&2.9.0/build/get/get-min.js"></script> 

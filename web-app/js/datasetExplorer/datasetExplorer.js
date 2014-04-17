@@ -648,6 +648,43 @@ Ext.onReady(function () {
                 collapsible: true
             }
         );
+        
+        metacoreEnrichmentPanel = new Ext.Panel(
+				{
+					id : 'metacoreEnrichmentPanel',
+					title : 'MetaCore Enrichment Analysis',
+					region : 'center',
+					split : true,
+					height : 90,
+					layout : 'fit',
+					//autoLoad : getExportJobs,
+					tbar : new Ext.Toolbar({
+						id : 'metacoreEnrichmentWorkflowToolbar',
+						title : 'Analysis menu',
+						items : []
+						}),
+					autoScroll : true,
+					autoLoad:
+			        {
+			        	url : pageInfo.basePath + '/metacoreEnrichment/index',
+			           	method:'GET',
+			           	// callback: setDataAssociationAvailableFlag,
+			           	evalScripts:true
+			        },
+					listeners :
+					{
+						activate : function(p) {
+							renderCohortSummaryMetaCoreEnrichment("cohortSummaryMetaCoreEnrichment");
+							initMetaCoreTab();
+						},
+						deactivate: function(){
+							//resultsTabPanel.tools.help.dom.style.display="none";
+						}
+					},
+					collapsible : true						
+				}
+		);
+       
         resultsTabPanel.add(queryPanel);
 
         resultsTabPanel.add(analysisPanel);
@@ -655,7 +692,9 @@ Ext.onReady(function () {
         resultsTabPanel.add(dataAssociationPanel);
         resultsTabPanel.add(analysisDataExportPanel);
         resultsTabPanel.add(analysisExportJobsPanel);
-
+        if (GLOBAL.metacoreAnalyticsEnabled) {
+			resultsTabPanel.add(metacoreEnrichmentPanel);
+		}
         southCenterPanel = new Ext.Panel(
             {
                 id: 'southCenterPanel',
