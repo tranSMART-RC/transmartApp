@@ -103,7 +103,6 @@ class DataExportService {
                 if (null != resultInstanceIdMap[subset] && !resultInstanceIdMap[subset].isEmpty()) {
                     // Construct a list of the URL objects we're running, submitted to the pool
                     selectedFilesList.each() { selectedFile ->
-							
                         if (StringUtils.equalsIgnoreCase(selectedFile, "CLINICAL.TXT")) {
                             writeClinicalData = true
                         }
@@ -148,9 +147,9 @@ class DataExportService {
                                 def tissueType = jobDataMap.get("gextissue")
                                 def gplString = jobDataMap.get("gexgpl")
 
-                                if (tissueType == ",") tissueType = ""
-                                if (sampleType == ",") sampleType = ""
-                                if (timepoint == ",") timepoint = ""
+                                if (tissueType == "," || tissueType == "undefined") tissueType = ""
+                                if (sampleType == "," || sampleType == "undefined") sampleType = ""
+                                if (timepoint == "," || timepoint == "undefined") timepoint = ""
 
                                 println("tissueType:" + tissueType)
                                 println("tissueType:" + sampleType)
@@ -369,7 +368,6 @@ class DataExportService {
                 }
             }
         }
-
     }
 
     static clinicalDataFileName(String studyDir) {
