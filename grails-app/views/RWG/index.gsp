@@ -528,6 +528,7 @@
 		<tmpl:createFolderOverlay />
 		<tmpl:createStudyOverlay />
 		<tmpl:createProgramOverlay />
+		<tmpl:/uploadFiles/uploadFilesOverlay /> 
 		<div id="divBrowsePopups" style="width:800px; display: none;">
 			
 		</div>

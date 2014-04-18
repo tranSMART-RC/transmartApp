@@ -827,6 +827,29 @@ jQuery(document).ready(function() {
 			});
     	}
 	});
+	
+	jQuery('#metadata-viewer').on('click', '.uploadfiles', function() {
+	    var id = jQuery(this).attr('name'); 
+	    jQuery('#uploadtitle').html("<p>Upload files in folder "+jQuery('#folderName').val()+"</p>");
+	    jQuery('#parentFolderId').val(id);      
+	    jQuery('#uploadFilesOverlay').fadeIn();
+	    if (jQuery('#existingfiles').val()!="yes"){
+	      jQuery.ajax({
+	        url:uploadFilesURL + "?",
+	        data: {folderId: id},      
+	        success: function(response) {
+	          jQuery('#uploadFiles').html(response).removeClass('ajaxloading');
+	        },
+	        error: function(xhr) {
+	          alert(xhr);
+	        }
+	      });
+	    }
+	    });
+	  
+	    jQuery('body').on('click', '#closeupload', function() {
+	      jQuery('#uploadFilesOverlay').fadeOut();  
+	    }); 
 
 	jQuery('#metadata-viewer').on('click', '.addstudy', function() {
 
@@ -914,7 +937,6 @@ jQuery(document).ready(function() {
 				data: {id: id},			
 				success: function(response) {
 					jQuery(checkboxes[i]).closest("tr").remove();
-					console.log(jQuery(checkboxes[i]).attr('name'));
 					jQuery('#cartcount').show().text(response);
 					updateExportCount();
 					jQuery('#metadata-viewer').find(".exportaddspan[name='" + ids[i] + "']").addClass("foldericon").addClass("add").addClass("link").text('Add to export');
@@ -1020,6 +1042,18 @@ jQuery(document).ready(function() {
 		showSearchResults();
 	}
 });
+
+function incrementeDocumentCount(folderId) {
+    var documentCount = jQuery('#folder-header-' + folderId + ' .document-count');
+    if (documentCount.size() > 0) {
+      var currentValue = documentCount.text();
+      documentCount.text(parseInt(currentValue) + 1);
+    }else{
+      jQuery('#folder-header-'+folderId).html(jQuery('#folder-header-'+folderId).html()+
+          '<tr><td class="foldertitle">'+
+      '<span class="result-document-count"><i>Documents (<span class="document-count">1</span>)</i></span></td></tr>');
+    }
+  } 
 
 function loadSearchFromSession() {
 	var sessionFilters = sessionSearch.split(",,,");
