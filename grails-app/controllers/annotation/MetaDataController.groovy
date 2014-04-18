@@ -94,9 +94,23 @@ class MetaDataController {
     def bioMarkerSearch = {
         log.info "EXT bioMarkerSearch called"
         def paramMap = params
-        log.info params
+        log.info params		
+		def itemlist = [];
+		
+		def geneJSON = searchKeywordService.findSearchKeywords("GENE", params.term, 10) as JSON
+		def list = JSON.parse(geneJSON.toString())
+		list.each { itemlist.add(it) }
+		def proteinJSON = searchKeywordService.findSearchKeywords("PROTEIN", params.term, 10) as JSON
+		list = JSON.parse(proteinJSON.toString())
+		list.each { itemlist.add(it) }
+		def mirnaJSON = searchKeywordService.findSearchKeywords("MIRNA", params.term, 10) as JSON
+		list = JSON.parse(mirnaJSON.toString())
+		list.each { itemlist.add(it) }
+		def metaboliteJSON = searchKeywordService.findSearchKeywords("METABOLITE", params.term, 10) as JSON
+		list = JSON.parse(metaboliteJSON.toString())
+		list.each { itemlist.add(it) }
 
-        render searchKeywordService.findSearchKeywords("GENE", params.term, 10) as JSON
+		render itemlist as JSON;
     }
 
     /**
