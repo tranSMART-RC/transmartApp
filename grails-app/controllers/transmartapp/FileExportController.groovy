@@ -161,7 +161,7 @@ class FileExportController {
                         }
                         mongo.close()
                     }else{
-                        def apiURL = grailsApplication.config.fr.def fileEntry = new ZipEntry(dirName + "/" + fmFolderService.safeFileName(fmFile.displayName))sanofi.mongoFiles.apiURL
+                        def apiURL = grailsApplication.config.fr.sanofi.mongoFiles.apiURL
                         def apiKey = grailsApplication.config.fr.sanofi.mongoFiles.apiKey
                         def http = new HTTPBuilder(apiURL+fmFile.filestoreName+"/fsfile")
                         http.request( Method.GET, ContentType.BINARY) { req ->
