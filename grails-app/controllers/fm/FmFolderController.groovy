@@ -1271,7 +1271,7 @@ class FmFolderController {
         def folder = FmFolder.get(id)
         if (folder) {
             fmFolderService.deleteFolder(folder)
-            render(template: 'deletedFolder')
+            render(status: 200, text: "fmFolder deleted")
         } else {
             render(status: 500, text: "FmFolder not found")
         }
