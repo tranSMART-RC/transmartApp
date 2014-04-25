@@ -275,8 +275,13 @@ DataExport.prototype.prepareOutString = function (files, subset, dataTypeId, met
     files.each(function (file) {
 
         if (!file.platforms) {
-            if (!dataCountExists) dataCountExists = true;
-            outStr += _this.createSelectBoxHtml(file, subset, dataTypeId)
+        	if (file.fileDataCount > 0) {
+	            dataCountExists = true;
+	            outStr += _this.createSelectBoxHtml(file, subset, dataTypeId)
+        	}else{
+        		 outStr += file.dataFormat + ' is not available. ';
+                 outStr += '<br/><br/>'
+        	}
         } else {
             if (file.platforms.length > 0) {
                 file.platforms.each(function (platform) {

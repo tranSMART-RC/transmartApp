@@ -814,8 +814,6 @@ jQuery(document).ready(function() {
 				url:deleteFolderURL,
 				data: {id: id},
 				success: function(response) {
-					//Update viewer with response ("folder has been deleted" message) and update the parent in the browse tree.
-					jQuery('#metadata-viewer').html(response);
 					updateFolder(parent);
 					showDetailDialog(parent);
 					jQuery('.result-folder-name').removeClass('selected');
@@ -827,6 +825,29 @@ jQuery(document).ready(function() {
 			});
     	}
 	});
+	
+	jQuery('#metadata-viewer').on('click', '.uploadfiles', function() {
+	    var id = jQuery(this).attr('name'); 
+	    jQuery('#uploadtitle').html("<p>Upload files in folder "+jQuery('#folderName').val()+"</p>");
+	    jQuery('#parentFolderId').val(id);      
+	    jQuery('#uploadFilesOverlay').fadeIn();
+	    if (jQuery('#existingfiles').val()!="yes"){
+	      jQuery.ajax({
+	        url:uploadFilesURL + "?",
+	        data: {folderId: id},      
+	        success: function(response) {
+	          jQuery('#uploadFiles').html(response).removeClass('ajaxloading');
+	        },
+	        error: function(xhr) {
+	          alert(xhr);
+	        }
+	      });
+	    }
+	    });
+	  
+	    jQuery('body').on('click', '#closeupload', function() {
+	      jQuery('#uploadFilesOverlay').fadeOut();  
+	    }); 
 
 	jQuery('#metadata-viewer').on('click', '.addstudy', function() {
 
@@ -901,30 +922,25 @@ jQuery(document).ready(function() {
 		if (ids.size() == 0) {return false;}
 
 		window.location = exportURL + "?id=" + ids.join(',');
-	    
-
-		for(j=0; j<ids.size(); j++){
-		    var id = ids[j];
-		    var i=0;
 		   
-		    jQuery('#cartcount').hide();
-		    
-			jQuery.ajax({
-				url:exportRemoveURL,
-				data: {id: id},			
-				success: function(response) {
-					jQuery(checkboxes[i]).closest("tr").remove();
-					console.log(jQuery(checkboxes[i]).attr('name'));
+	    jQuery('#cartcount').hide();
+	    
+		jQuery.ajax({
+			url:exportRemoveURL,
+			data: {id: ids.join(',')},			
+			success: function(response) {
+				for(j=0; j<ids.size(); j++){
+					jQuery(checkboxes[j]).closest("tr").remove();
+					console.log(response);
 					jQuery('#cartcount').show().text(response);
 					updateExportCount();
-					jQuery('#metadata-viewer').find(".exportaddspan[name='" + ids[i] + "']").addClass("foldericon").addClass("add").addClass("link").text('Add to export');
-					i=i+1;
-				},
-				error: function(xhr) {
-					jQuery('#cartcount').show();
+					jQuery('#metadata-viewer').find(".exportaddspan[name='" + ids[j] + "']").addClass("foldericon").addClass("add").addClass("link").text('Add to export');
 				}
-			});
-		}
+			},
+			error: function(xhr) {
+				jQuery('#cartcount').show();
+			}
+		});
 	});
 
 	jQuery('body').on('click', '#closeexport', function() {
@@ -1020,6 +1036,18 @@ jQuery(document).ready(function() {
 		showSearchResults();
 	}
 });
+
+function incrementeDocumentCount(folderId) {
+    var documentCount = jQuery('#folder-header-' + folderId + ' .document-count');
+    if (documentCount.size() > 0) {
+      var currentValue = documentCount.text();
+      documentCount.text(parseInt(currentValue) + 1);
+    }else{
+      jQuery('#folder-header-'+folderId).html(jQuery('#folder-header-'+folderId).html()+
+          '<tr><td class="foldertitle">'+
+      '<span class="result-document-count"><i>Documents (<span class="document-count">1</span>)</i></span></td></tr>');
+    }
+  } 
 
 function loadSearchFromSession() {
 	var sessionFilters = sessionSearch.split(",,,");

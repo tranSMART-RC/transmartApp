@@ -417,11 +417,11 @@ class SnpDataService {
 			SELECT b.* 
 			FROM bio_content b
 			WHERE b.study_name in ${studies}
-			AND b.file_name IN (SELECT DISTINCT sg.gsm_num FROM de_snp_calls_by_gsm sg WHERE sg.patient_num IN (
+			AND b.file_name IN (SELECT DISTINCT sg.sample_cd FROM de_subject_sample_mapping sg WHERE platform='SNP' and sg.patient_id IN (
 			    SELECT DISTINCT patient_num FROM qt_patient_set_collection WHERE result_instance_id = ?
 					 AND patient_num IN (SELECT patient_num FROM patient_dimension WHERE sourcesystem_cd NOT LIKE '%:S:%')))
 		"""
-
+		
         def celFiles = sql.rows(query, [resultInstanceId])
         def filesList = []
         for (file in celFiles) {
