@@ -15,6 +15,8 @@ var nodesBeforeSelect = new Array();
 // will still fire but is stopped immediately); and set this flag back to true at the end of the event so it can be triggered again.  
 var allowOnSelectEvent = true;
 
+var uploader;
+
 // Method to add the categories for the select box
 function addSelectCategories()	{
 	
@@ -832,7 +834,7 @@ jQuery(document).ready(function() {
 	jQuery('#metadata-viewer').on('click', '.uploadfiles', function() {
 	    var id = jQuery(this).attr('name'); 
 	    jQuery('#uploadtitle').html("<p>Upload files in folder "+jQuery('#folderName').val()+"</p>");
-	    jQuery('#parentFolderId').val(id);      
+	    jQuery('#parentFolderId').val(id);   
 	    jQuery('#uploadFilesOverlay').fadeIn();
 	    if (jQuery('#existingfiles').val()!="yes"){
 	      jQuery.ajax({
@@ -840,11 +842,14 @@ jQuery(document).ready(function() {
 	        data: {folderId: id},      
 	        success: function(response) {
 	          jQuery('#uploadFiles').html(response).removeClass('ajaxloading');
+	          createUploader();
 	        },
 	        error: function(xhr) {
 	          alert(xhr);
 	        }
 	      });
+	    }else{
+	    	setUploderEndPoint(id);
 	    }
 	    });
 	  
@@ -1164,3 +1169,63 @@ jQuery.ajaxSetup({
 	cache: false
 });
 
+function createUploader() {
+    $fub = jQuery('#fine-uploader-basic');
+    uploader = new qq.FineUploaderBasic({
+      button: $fub[0],
+      multiple: true,
+      request: {
+        endpoint: uploadActionURL+'?parentId='+jQuery('#parentFolderId').val()
+      },
+      callbacks: {
+        onSubmit: function(id, fileName) {
+            var folderName = jQuery('#folderName').val();
+              
+            jQuery('#uploadtable').append('<tr id="file-' + id + '" class="alert" style="margin: 20px 0 0">'+
+                '<td id="parent">'+folderName+'</td>'+
+                '<td id="name">'+fileName+'</td>'+
+                '<td id="status">Submitting</td>'+
+                '<td id="progress"></td></tr>');
+        },
+        onUpload: function(id, fileName) {
+            jQuery('#file-' + id + " #name").html(fileName);
+            jQuery('#file-' + id + " #status").html('Initializing ');
+        },
+        onProgress: function(id, fileName, loaded, total) {
+          if (loaded < total) {
+            progress = Math.round(loaded / total * 100) + '% of ' + Math.round(total / 1024) + ' kB';
+
+            jQuery('#file-' + id + " #status").html('Uploading ');
+            jQuery('#file-' + id + " #progress").html(progress);
+          } else {
+              jQuery('#file-' + id + " #status").html('Saving');
+              jQuery('#file-' + id + " #progress").html('100%');
+          }
+        },
+        onComplete: function(id, fileName, responseJSON) {
+          if (responseJSON.success) {
+            jQuery('#file-' + id + " #status").html('File successfully uploaded ');
+              jQuery('#file-' + id + " #progress").html('');
+
+              var folderId=responseJSON.folderId;
+              incrementeDocumentCount(folderId);
+              
+              if(folderId == jQuery('#parentFolderId').val()){
+                jQuery('#metadata-viewer').empty().addClass('ajaxloading');
+                jQuery('#metadata-viewer').load(folderDetailsURL + '?id=' + folderId, {}, function() {
+                    jQuery('#metadata-viewer').removeClass('ajaxloading');
+                });
+              }
+          } else {
+              jQuery('#file-' + id + " #status").html('Error: '+responseJSON.error);
+                jQuery('#file-' + id + " #progress").html('');
+          }
+          
+        }
+      }
+    });
+}
+
+function setUploderEndPoint(id) {
+	uploader.setEndpoint(uploadActionURL+'?parentId='+id);
+}

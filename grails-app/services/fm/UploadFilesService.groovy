@@ -71,7 +71,7 @@ class UploadFilesService {
             }
 
             // Check if folder already contains file with same name.
-            fmFile = FmFile.findByOriginalName(fileName)
+			fmFile = fmFolder.fmFiles.find { it.originalName == fileName }
             // If it does, then use existing file record and increment its version.
             // Otherwise, create a new file.
             if (fmFile != null) {
