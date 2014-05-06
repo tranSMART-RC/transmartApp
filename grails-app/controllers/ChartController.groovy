@@ -635,21 +635,7 @@ class ChartController {
         if (s2) {
             i2b2HelperService.addAllPatientDemographicDataForSubsetToTable(table, result_instance_id2, "subset2");
         }
-        List<String> keys = i2b2HelperService.getConceptKeysInSubsets(result_instance_id1, result_instance_id2);
 
-        Set<String> uniqueConcepts = i2b2HelperService.getDistinctConceptSet(result_instance_id1, result_instance_id2);
-
-        log.debug("Unique concepts: " + uniqueConcepts);
-
-        for (int i = 0; i < keys.size(); i++) {
-            log.trace("adding concept data for " + keys.get(i));
-            if (s1) {
-                i2b2HelperService.addConceptDataToTable(table, keys.get(i), result_instance_id1);
-            }
-            if (s2) {
-                i2b2HelperService.addConceptDataToTable(table, keys.get(i), result_instance_id2);
-            }
-        }
         pw.write(table.toJSONObject().toString(5));
         pw.flush();
         request.getSession().setAttribute("gridtable", table);

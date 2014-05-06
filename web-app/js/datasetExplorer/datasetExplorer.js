@@ -499,8 +499,12 @@ Ext.onReady(function () {
                 height: 90,
                 layout: 'fit',
                 listeners: {
-                    activate: function () {
-                        getSummaryGridData();
+                    activate: function (p) {
+                        if (isSubsetQueriesChanged(p.subsetQueries) || !Ext.get('analysis_title')) {
+                        	resultsTabPanel.setActiveTab('analysisPanel');
+                        }else{
+                        	storeLoaded();
+                        }
                     }
                 }
             }
@@ -3348,6 +3352,7 @@ function getSummaryStatistics() {
             method: 'POST',
             success: function (result, request) {
                 getSummaryStatisticsComplete(result);
+                getSummaryGridData();
                 analysisPanel.body.unmask();
             },
             failure: function (result, request) {
