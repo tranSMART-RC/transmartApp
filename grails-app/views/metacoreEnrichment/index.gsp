@@ -70,7 +70,7 @@
 		<tr>
 			<td align="right"><input style="font: 9pt tahoma;" type="button"
 			
-				onclick="highDimensionalData.gather_high_dimensional_data('divIndependentVariable')"
+				onclick="highDimensionalData.gather_high_dimensional_data('divIndependentVariable', true)"
 				value="High Dimensional Data"> <input type="hidden"
 				id="multipleSubsets" name="multipleSubsets" value="true" /></td>
 		</tr>
