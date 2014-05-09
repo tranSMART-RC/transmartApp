@@ -95,12 +95,12 @@ class SnpDataService {
         def flushInterval = 5000
         def groovy.sql.Sql sql = new groovy.sql.Sql(dataSource)
 
-        def subjectIds = i2b2HelperService.getSubjectsAsList(resultInstanceId)
+        def subjectIds = getSubjectsAsList(resultInstanceId)
         /**
          * Input params required for the R script are parentDir and subjectIdsStr
          */
         def parentDir = null
-        def subjectIdsStr = i2b2HelperService.getSubjects(resultInstanceId)
+        def subjectIdsStr = convertList(subjectIds,false, 1000)
 
         def patientDataMap = getPatientData(resultInstanceId)
         //Create objects we use to form JDBC connection.
@@ -271,7 +271,7 @@ class SnpDataService {
     }
 
     def private Map writePEDFiles(studyDir, fileName, jobName, resultInstanceId) {
-        def subjectIds = i2b2HelperService.getSubjectsAsList(resultInstanceId)
+        def subjectIds = getSubjectsAsList(resultInstanceId)
         def patientConceptCdPEDFileMap = [:]
         def groovy.sql.Sql sql = null
         def FileWriterUtil writerUtil = null
@@ -380,7 +380,7 @@ class SnpDataService {
 
         //Get all the patient_ids/subjects
         result_instance_ids.each { resultInstance ->
-            subjectsSet.addAll(i2b2HelperService.getSubjectsAsList(resultInstance.value))
+            subjectsSet.addAll(getSubjectsAsList(resultInstance.value))
         }
 
         def subjectsStr = new StringBuilder();
@@ -390,15 +390,21 @@ class SnpDataService {
         return subjectIds
     }
 
-    def private List getSubjectsAsList(result_instance_ids) {
-        def Set subjectsSet = new HashSet()
+    def private List getSubjectsAsList(resultInstanceId) {
+		def subjects = []; 
+		def groovy.sql.Sql sql = new groovy.sql.Sql(dataSource)
 
-        //Get all the patient_ids/subjects
-        result_instance_ids.each { resultInstance ->
-            subjectsSet.addAll(i2b2HelperService.getSubjectsAsList(resultInstance.value))
-        }
-
-        return subjectsSet?.toList()
+        def query = """	SELECT DISTINCT s.patient_id
+							FROM 	de_subject_sample_mapping s,
+									qt_patient_set_collection qt 
+							WHERE qt.patient_num = s.patient_id 
+							AND s.platform = 'SNP'
+							AND qt.result_instance_id = ? """
+		
+		sql.eachRow(query, [resultInstanceId], { row ->
+            subjects.add(row.patient_id)
+        });
+		return subjects
     }
 
     def private getDataForMAPFile(String fileName, String jobName, HashMap result_instance_ids) {
