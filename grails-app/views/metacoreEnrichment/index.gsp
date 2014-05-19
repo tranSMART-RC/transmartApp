@@ -62,15 +62,15 @@
 		</tr>
 		<tr>
 			<td align="right"><input style="font: 9pt tahoma;" type="button"
-				onclick="clearGroupHeatmap('divIndependentVariable')"
+				onclick="RmodulesView.prototype.clear_high_dimensional_input('divMetacoreVariable')"
 				value="X"> <br />
-				<div id='divIndependentVariable'
+				<div id='divMetacoreVariable'
 					class="queryGroupIncludeSmall"></div></td>
 		</tr>
 		<tr>
 			<td align="right"><input style="font: 9pt tahoma;" type="button"
 			
-				onclick="highDimensionalData.gather_high_dimensional_data('divIndependentVariable', true)"
+				onclick="highDimensionalData.gather_high_dimensional_data('divMetacoreVariable', true)"
 				value="High Dimensional Data"> <input type="hidden"
 				id="multipleSubsets" name="multipleSubsets" value="true" /></td>
 		</tr>
@@ -79,7 +79,7 @@
 		</tr>
 		<tr>
 			<td>
-				<div id="displaydivIndependentVariable" class="independentVars"></div>
+				<div id="displaydivMetacoreVariable" class="independentVars"></div>
 			</td>
 		</tr>
 		<tr>

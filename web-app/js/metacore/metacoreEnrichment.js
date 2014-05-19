@@ -6,9 +6,10 @@ function registerMetaCoreEnrichmentDragAndDrop()
 {
 	//Set up drag and drop for Dependent and Independent variables on the data association tab.
 	//Get the Independent DIV
-	var independentDiv = Ext.get("divIndependentVariable");
+	var independentDiv = Ext.get("divMetacoreVariable");
 	dtgI = new Ext.dd.DropTarget(independentDiv,{ddGroup : 'makeQuery'});
 	dtgI.notifyDrop = dropOntoCategorySelection;
+	RmodulesView.prototype.clear_high_dimensional_input('divMetacoreVariable');
 } 
 
 function initMetaCoreTab()
@@ -44,13 +45,13 @@ function renderCohortSummaryMetaCoreEnrichment(cohortSummaryDisplayId) {
 //TODO: needs refactoring: modified copy of submitHeatmapJob from /plugins/rdc-modules-0.1/js/plugin/Heatmap.js
 function submitMetaCoreEnrichmentJob(form) {
 	var independentVariableConceptCode = "";
-	independentVariableConceptCode = readConceptVariables("divIndependentVariable");
+	independentVariableConceptCode = readConceptVariables("divMetacoreVariable");
 	var variablesConceptCode = independentVariableConceptCode;
 	// ----------------------------------
 	// Validation
 	// ----------------------------------
 	// This is the independent variable.
-	var independentVariableEle = Ext.get("divIndependentVariable");
+	var independentVariableEle = Ext.get("divMetacoreVariable");
 	// Get the types of nodes from the input box.
 	var independentNodeList = createNodeTypeArrayFromDiv(
 			independentVariableEle, "setnodetype")
@@ -76,14 +77,14 @@ function submitMetaCoreEnrichmentJob(form) {
 		jobType : 'MetaCoreEnrichment'
 	};
 	// Use a common function to load the High Dimensional Data params.
-	loadCommonHighDimFormObjects(formParams, "divIndependentVariable")
+	loadCommonHighDimFormObjects(formParams, "divMetacoreVariable")
 	// ------------------------------------
 	// More Validation
 	// ------------------------------------
 	// If the user dragged in a high dim node, but didn't enter the High Dim
 	// Screen, throw an error.
 	if (independentNodeList[0] == 'hleaficon'
-			&& formParams["divIndependentVariableType"] == "CLINICAL") {
+			&& formParams["divMetacoreVariableType"] == "CLINICAL") {
 		Ext.Msg
 				.alert(
 						'Wrong input',
@@ -92,7 +93,7 @@ function submitMetaCoreEnrichmentJob(form) {
 	}
 	// For the time being if the user is trying to run anything but GEX, stop
 	// them.
-	if (formParams["divIndependentVariableType"] != "MRNA") {
+	if (formParams["divMetacoreVariableType"] != "MRNA") {
 		Ext.Msg
 				.alert(
 						"Invalid selection",
@@ -124,7 +125,7 @@ function runEnrichment(preparedData) {
 			var data = Ext.decode(response.responseText);
 			if (data.Code == 0) {
 				drawEnrichment(data.Result[0]);
-				scrollToEnrichmentResults();
+				//scrollToEnrichmentResults();
 			}
 		},
 		failure : function(response, request) {
