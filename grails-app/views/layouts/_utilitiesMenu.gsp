@@ -18,7 +18,7 @@
 -->
 
 <%-- Quick, self-contained replica of the Ext utilities menu, for use on pages without the Ext library (faceted search) --%>
-			<g:javascript>
+			<script type="text/javascript">
 				function toggleMenu() {
 					jQuery('#utilitiesMenu').fadeToggle();
 				}
@@ -28,7 +28,7 @@
 						jQuery('#utilitiesMenu').hide();
 					});
 				});
-			</g:javascript>
+			</script>
 			<style type="text/css">
 				#utilitiesMenu{font:normal 11px tahoma,arial,sans-serif; border:1px solid #718bb7;z-index:15000;zoom:1;background:#f0f0f0 repeat-y; padding: 4px; position: absolute; right: 0; top: 24px; display: none;}
 				#utilitiesMenu a{text-decoration:none!important; font-weight:normal!important;}
