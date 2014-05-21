@@ -63,7 +63,6 @@ import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.List
 
-//import edu.mit.wi.haploview.*;
 class ChartController {
 
     def index = {}
@@ -193,7 +192,6 @@ class ChartController {
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         NumberAxis domainAxis = (NumberAxis) plot.getDomainAxis();
-        //domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         ChartRenderingInfo info = new ChartRenderingInfo(new StandardEntityCollection());
         PrintWriter pw = new PrintWriter(response.getOutputStream());
@@ -202,7 +200,6 @@ class ChartController {
         String graphURL = request.getContextPath() + "/chart/displayChart?filename=" + filename;
 
         //  Write the image map to the PrintWriter
-        //pw.write("<html><body>");
         pw.write("<img src='" + graphURL + "' width=245 height=180 border=0 usemap='#" + filename + "'>");
         ChartUtilities.writeImageMap(pw, filename, info, false);
         pw.flush();
@@ -250,7 +247,6 @@ class ChartController {
             rangeAxis2.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
             NumberAxis domainAxis2 = (NumberAxis) plot2.getDomainAxis();
-            //domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
             ChartRenderingInfo info2 = new ChartRenderingInfo(new StandardEntityCollection());
 
@@ -278,19 +274,7 @@ class ChartController {
         String analysis_key = i2b2HelperService.getConceptKeyForAnalysis(concept_key);
         PrintWriter pw = new PrintWriter(response.getOutputStream());
         pw.write("<html><head><link rel='stylesheet' type='text/css' href='../css/chartservlet.css'></head><body><div class='analysis'>");
-        //renderConceptAnalysis(analysis_key, result_instance_id1, result_instance_id2, pw, request);
         log.debug("in analysis controller about to run render concept: " + analysis_key + " result_instance_id1:" + result_instance_id1);
-
-        // need to modify to try looking for equivalent concepts on both subsets
-        //String parentConcept = i2b2HelperService.lookupParentConcept(i2b2HelperService.keyToPath(concept_key));
-        //log.debug("parent concept: "+parentConcept);
-
-        //Set<String> cconcepts = i2b2HelperService.lookupChildConcepts(parentConcept, result_instance_id1, result_instance_id2);
-        //if (cconcepts.isEmpty()) {
-        //		cconcepts.add(concept_key);
-        //	}
-
-        //	log.debug("child concepts: "+cconcepts);
 
         log.debug("calling renderConceptAnalysisNew from analysis with analysis_key:" + analysis_key);
         renderConceptAnalysisNew(analysis_key, result_instance_id1, result_instance_id2, pw, request);
@@ -301,14 +285,12 @@ class ChartController {
 
             for (String c : i2b2HelperService.getChildValueConceptsFromParentKey(concept_key)) {
                 log.debug("-- rendering " + c)
-                //logMessage("child key:"+c);
                 renderConceptAnalysisNew(c, result_instance_id1, result_instance_id2, pw, request);
                 pw.write("<hr>");
             }
 
 
         }
-        //renderPatientCountInfoTable(result_instance_id1, result_instance_id2, pw);
         pw.write("</div></body></html>");
         pw.flush();
     }
@@ -395,7 +377,6 @@ class ChartController {
         rangeAxis3.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         NumberAxis domainAxis3 = (NumberAxis) plot3.getDomainAxis();
-        //domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         ChartRenderingInfo info3 = new ChartRenderingInfo(new StandardEntityCollection());
 
@@ -436,7 +417,6 @@ class ChartController {
         NumberAxis rangeAxis7 = (NumberAxis) plot7.getRangeAxis();
         BoxAndWhiskerRenderer rend7 = (BoxAndWhiskerRenderer) plot7.getRenderer();
         rend7.setMaximumBarWidth(0.10);
-        //rangeAxis7.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         ChartRenderingInfo info7 = new ChartRenderingInfo(new StandardEntityCollection());
 
         String filename7 = ServletUtilities.saveChartAsJPEG(chart7, 200, 300, info7, request.getSession());
@@ -466,7 +446,6 @@ class ChartController {
             graphURL7 = request.getContextPath() + "/chart/displayChart?filename=" + filename7;
             pw.write("<img src='" + graphURL7 + "' width=200 height=200 border=0 usemap='#" + filename7 + "'>");
             ChartUtilities.writeImageMap(pw, filename7, info7, false);
-            //pw.write("<b>Sex</b>");
             renderCategoryResultsHashMap(sexs1, "Subset 1", i2b2HelperService.getPatientSetSize(result_instance_id1), pw);
         }
 
@@ -479,7 +458,6 @@ class ChartController {
             graphURL7 = request.getContextPath() + "/chart/displayChart?filename=" + filename7;
             pw.write("<img src='" + graphURL7 + "' width=200 height=200 border=0 usemap='#" + filename7 + "'>");
             ChartUtilities.writeImageMap(pw, filename7, info7, false);
-            //pw.write("<b>Sex</b>");
             renderCategoryResultsHashMap(sexs2, "Subset 2", i2b2HelperService.getPatientSetSize(result_instance_id2), pw);
         }
 
@@ -535,14 +513,12 @@ class ChartController {
         pw.write("<tr><td width='50%' align='center'>");
         if (s1) {
             pw.write("<br>");
-            // HashMap<String, Integer> race1=i2b2HelperService.getPatientDemographicDataForSubset("race_cd", result_instance_id1);
             JFreeChart chart = createConceptAnalysisPieChart(hashMapToPieDataset(race1, "Race"), "Race");
             info7 = new ChartRenderingInfo(new StandardEntityCollection());
             filename7 = ServletUtilities.saveChartAsJPEG(chart, 300, 200, info7, request.getSession());
             graphURL7 = request.getContextPath() + "/chart/displayChart?filename=" + filename7;
             pw.write("<img src='" + graphURL7 + "' width=300 height=200 border=0 usemap='#" + filename7 + "'>");
             ChartUtilities.writeImageMap(pw, filename7, info7, false);
-            //pw.write("<b>Race</b>");
             renderCategoryResultsHashMap(race1, "Subset 1", i2b2HelperService.getPatientSetSize(result_instance_id1), pw);
         }
 
@@ -550,14 +526,12 @@ class ChartController {
 
         if (s2) {
             pw.write("<br>");
-            // HashMap<String, Integer> race2=i2b2HelperService.getPatientDemographicDataForSubset("race_cd", result_instance_id2);
             JFreeChart chart = createConceptAnalysisPieChart(hashMapToPieDataset(race2, "Race"), "Race");
             info7 = new ChartRenderingInfo(new StandardEntityCollection());
             filename7 = ServletUtilities.saveChartAsJPEG(chart, 300, 200, info7, request.getSession());
             graphURL7 = request.getContextPath() + "/chart/displayChart?filename=" + filename7;
             pw.write("<img src='" + graphURL7 + "' width=300 height=200 border=0 usemap='#" + filename7 + "'>");
             ChartUtilities.writeImageMap(pw, filename7, info7, false);
-            //pw.write("<b>Race</b>");
             renderCategoryResultsHashMap(race2, "Subset 2", i2b2HelperService.getPatientSetSize(result_instance_id2), pw);
         }
 
@@ -581,32 +555,16 @@ class ChartController {
 
         log.debug("Unique concepts: " + uniqueConcepts);
 
-        // for (int i = 0; i < keys.size(); i++)
         for (k in uniqueConcepts) {
-            //String analysis_key = i2b2HelperService.getConceptKeyForAnalysis(keys.get(i));
-            //String analysis_key = i2b2HelperService.getConceptKeyForAnalysis(k);
+
             String analysis_key = k;
             if (analysis_key.indexOf("SECURITY") > -1) {
                 continue;
             }
-            //log.trace("Analysis Key: "+i+", "+analysis_key);
             log.debug("calling renderConceptAnalysisNew from basic statistics:\tk:" + k + "\tanalysis_key:" + analysis_key);
             renderConceptAnalysisNew(analysis_key, result_instance_id1, result_instance_id2, pw, request);
             pw.write("<hr>");
         }
-        /*test harness*//*
-        ExportTableNew table=new ExportTableNew();
-        addAllPatientDemographicDataForSubsetToTable(table, result_instance_id1, "subset1");
-        addAllPatientDemographicDataForSubsetToTable(table, result_instance_id2, "subset2");
-        for(int i=0;i<keys.size();i++)
-        {
-            addConceptDataToTable(table, keys.get(i), result_instance_id1);
-            addConceptDataToTable(table, keys.get(i), result_instance_id2);
-        }
-        pw.write("<pre>");
-        pw.write(table.toJSONObject().toString(5));
-        pw.write("</pre>");*/
-        /*end test*/
         pw.write("</div></body></html>");
         pw.flush();
     }
@@ -689,11 +647,8 @@ class ChartController {
             conceptKeys.add(concept_key);
         }
 
-        //	println(prefix);
         log.debug("child concepts: " + cconcepts);
-//		println("org concept key:"+concept_key);
         for (ck in conceptKeys) {
-            //	println("new conceptkeys:"+ck);
             if (s1) {
                 i2b2HelperService.addConceptDataToTable(table, ck, result_instance_id1);
             }
@@ -778,27 +733,23 @@ class ChartController {
                 + "<th>Category</th>"
                 + "<th>" + title + " (n)</th>"
                 + "<th>" + title + " (%n)</th>"
-                // + "<th>" + title + " (% " + totalsubjects + " Subjects)</th>"
                 + "</tr>"
         );
         for (int i = 0; i < mapsize; i++) {
             Map.Entry<String, Integer> entry = (Map.Entry<String, Integer>) keyValuePairs2.next();
             String key = entry.getKey();
             Integer value = entry.getValue();
-            Double test = ((double) value / (double) totalsubjects);
             pw.write("<tr>"
                     + "<td>" + key + "</td>"
                     + "<td>" + value.toString() + "</td>"
-                    + "<td>" + form.format(((double) value / (double) total)) + "</td>"
-                    // + "<td>" + form.format(test) + "</td>"
+                    + "<td>" + form.format((total == 0) ? 0 : ((double) value / (double) total)) + "</td>"
                     + "</tr>"
             );
         }
         pw.write("<tr>"
                 + "<td><b>Total</b></td>"
                 + "<td><b>" + total + "</b></td>"
-                + "<td><b>" + form.format(((double) total / (double) total)) + "</b></td>"
-                // + "<td><b>N/A</b></td>"
+                + "<td><b>" + form.format((total == 0) ? 0 : ((double) total / (double) total)) + "</b></td>"
                 + "</tr>"
         );
         pw.write("</table>");
@@ -954,14 +905,6 @@ class ChartController {
         DefaultPieDataset dataset = new DefaultPieDataset();
         int mapsize = results.size();
         double total = 0;
-/*Iterator keyValuePairs1 = results.entrySet().iterator();
-//get the sum of the results so i can do percents
-for (int i = 0; i < mapsize; i++)
-{
-  Map.Entry<String,Integer> entry = (Map.Entry<String,Integer>) keyValuePairs1.next();
-  Integer value = entry.getValue();
-  total=total+value;
-}*/
         Iterator keyValuePairs2 = results.entrySet().iterator();
         for (int i = 0; i < mapsize; i++) {
             Map.Entry<String, Integer> entry = (Map.Entry<String, Integer>) keyValuePairs2.next();
@@ -987,9 +930,6 @@ for (int i = 0; i < mapsize; i++)
                 true,
                 false
         );
-        /*chart.addSubtitle(new TextTitle(
-                "Source: http://www.homeoffice.gov.uk/rds/pdfs2/r188.pdf",
-                new Font("Dialog", Font.ITALIC, 10)));*/
         chart.getTitle().setFont(new Font("SansSerif", Font.BOLD, 12));
         CategoryPlot plot = (CategoryPlot) chart.getPlot();
 
@@ -1015,7 +955,6 @@ for (int i = 0; i < mapsize; i++)
         rangeAxis.setRangeType(RangeType.POSITIVE);
         rangeAxis.setLabel("Count of Observations");
         rangeAxis.setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
-        //ChartUtilities.applyCurrentTheme(chart);
         return chart;
     }
 
@@ -1101,9 +1040,6 @@ for (int i = 0; i < mapsize; i++)
                 double[] values3 = valuesAlist3.toArray();
                 double[] values4 = valuesAlist4.toArray();
 
-                //double[] values3=i2b2HelperService.getConceptDistributionDataForValueConcept(concept_key, result_instance_id1);
-                //double[] values4=i2b2HelperService.getConceptDistributionDataForValueConcept(concept_key, result_instance_id2);
-
                 /*render the double histogram*/
                 HistogramDataset dataset3 = new HistogramDataset();
                 if (s1) {
@@ -1136,27 +1072,11 @@ for (int i = 0; i < mapsize; i++)
                 rangeAxis3.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
                 NumberAxis domainAxis3 = (NumberAxis) plot3.getDomainAxis();
-                //domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
                 ChartRenderingInfo info3 = new ChartRenderingInfo(new StandardEntityCollection());
 
                 String filename3 = ServletUtilities.saveChartAsJPEG(chart3, 245, 180, info3, request.getSession());
                 String graphURL3 = request.getContextPath() + "/chart/displayChart?filename=" + filename3;
-
-                /*get the data*/
-                /*
-                    def results1;
-                    if(s1){
-                        log.trace("getting data for subset 1 in render value concept analysis")
-                        results1=i2b2HelperService.getConceptDistributionDataForValueConceptByTrial(concept_key, result_instance_id1)
-                    }
-
-                    def results2;
-                    if(s2){
-                        log.trace("getting data for subset 1 in render value concept analysis")
-                        results2=i2b2HelperService.getConceptDistributionDataForValueConceptByTrial(concept_key, result_instance_id2)
-                    }
-                */
 
                 def results1;
                 def results2;
@@ -1234,7 +1154,6 @@ for (int i = 0; i < mapsize; i++)
                 //adjust the width depending on number of sets
 
                 NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-                //rangeAxis7.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
                 ChartRenderingInfo info = new ChartRenderingInfo(new StandardEntityCollection());
 
@@ -1303,7 +1222,6 @@ for (int i = 0; i < mapsize; i++)
                     log.debug("concept_key:" + concept_key + ", results2: " + results2);
                 }
                 int height = 80 + 15 * results1.size();
-                /*printHashMap(results1, pw);*/
 
                 pw.write("<table width='100%'><tr>");
                 pw.write("<tr><td align='center' colspan='2'><div class='analysistitle'>Analysis of " + concept_name + " for subsets:</div></td></tr>");
