@@ -314,14 +314,14 @@ DataExport.prototype.prepareOutString = function (files, subset, dataTypeId, met
 DataExport.prototype.createSelectBoxHtml = function (file, subset, dataTypeId, platform) {
     outStr = '';
     if (platform) {
-        outStr += file.dataFormat + ' is available for </br/>' + platform.gplTitle + ": " + platform.fileDataCount + ' patients';
+        outStr += file.dataFormat + ' is available for </br/>' + platform.gplTitle + ": " + platform.fileDataCount + ' subjects';
         outStr += '<br/> Export (' + file.fileType + ')&nbsp;&nbsp;';
         outStr += '<input type="checkbox" name="SubsetDataTypeFileType"';
         outStr += ' value="' + subset + '_' + dataTypeId + '_' + file.fileType + '_' + platform.gplId + '"';
         outStr += ' id="' + subset + '_' + dataTypeId + '_' + file.fileType + '_' + platform.gplId + '"';
         outStr += ' /><br/><br/>';
     } else {
-        outStr += file.dataFormat + ' is available for ' + file.fileDataCount + ' patients';
+        outStr += file.dataFormat + ' is available for ' + file.fileDataCount + ' subjects';
         outStr += '<br/> Export (' + file.fileType + ')&nbsp;&nbsp;';
         outStr += '<input type="checkbox" name="SubsetDataTypeFileType"';
         outStr += ' value="' + subset + '_' + dataTypeId + '_' + file.fileType + '"';

@@ -43,7 +43,7 @@ class UploadFilesController {
             log.debug(file.toString()+": "+msg)
         }
         def result
-        if(msg == "File successfully loaded") result = [success: true, folderId: params.parentId, folderParentId: params.folderParentId]
+        if(msg == "File successfully loaded") result = [success: true, folderId: params.parentId]
         else result = [success: false, error: msg]
         render text: result as JSON, contentType: 'text/html'
     }

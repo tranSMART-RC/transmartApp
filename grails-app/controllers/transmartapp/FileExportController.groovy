@@ -71,7 +71,7 @@ class FileExportController {
     }
 
     def remove = {
-        def idList = params.list('id')
+        def idList = params.id.split(",")
 
         def exportList = session['export']
 
