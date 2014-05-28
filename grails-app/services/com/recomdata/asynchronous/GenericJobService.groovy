@@ -287,7 +287,9 @@ class GenericJobService implements Job {
         new File(rOutputDirectory).mkdir()
 
         //Establish a connection to R Server.
-        RConnection c = new RConnection();
+		String rServeHost = "localhost"
+		if(Holders.config.org.transmart.rServeHost) rServeHost = Holders.config.org.transmart.rServeHost
+        RConnection c = new RConnection(rServeHost);
 
         log.debug("Attempting following R Command : " + "setwd('${rOutputDirectory}')".replace("\\", "\\\\"))
         println("Attempting following R Command : " + "setwd('${rOutputDirectory}')".replace("\\", "\\\\"))

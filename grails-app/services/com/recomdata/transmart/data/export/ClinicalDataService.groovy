@@ -283,7 +283,9 @@ class ClinicalDataService {
             File inputFile = new File(inputFileLoc)
             if (null != inputFile) {
                 String rOutputDirectory = inputFile.getParent()
-                RConnection c = new RConnection()
+				String rServeHost = "localhost"
+				if(Holders.config.org.transmart.rServeHost) rServeHost = Holders.config.org.transmart.rServeHost
+                RConnection c = new RConnection(rServeHost)
 
                 //Set the working directory to be our temporary location.
                 String workingDirectoryCommand = "setwd('${rOutputDirectory}')".replace("\\", "\\\\")
