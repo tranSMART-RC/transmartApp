@@ -63,71 +63,65 @@ class BootStrap {
 
         /* rScriptDirectory */
         val = c.com.recomdata.transmart.data.export.rScriptDirectory
-        if (val) {
-            logger.warn("com.recomdata.transmart.data.export.rScriptDirectory " +
-                    "should not be explicitly set, value '$val' ignored")
-        }
-
         def servletContext = grailsApplication.mainContext.servletContext
-
-        def tsAppRScriptsDir = servletContext.getRealPath('dataExportRScripts')
-        if (tsAppRScriptsDir) {
-            tsAppRScriptsDir = new File(tsAppRScriptsDir)
+        if (!val) {
+	
+	        def tsAppRScriptsDir = servletContext.getRealPath('dataExportRScripts')
+	        if (tsAppRScriptsDir) {
+	            tsAppRScriptsDir = new File(tsAppRScriptsDir)
+	        }
+	        if (!tsAppRScriptsDir || !tsAppRScriptsDir.isDirectory()) {
+	            tsAppRScriptsDir = servletContext.getRealPath('.') +
+	                    '/../dataExportRScripts'
+	            if (tsAppRScriptsDir) {
+	                tsAppRScriptsDir = new File(tsAppRScriptsDir)
+	            }
+	        }
+	        if (!tsAppRScriptsDir || !tsAppRScriptsDir.isDirectory()) {
+	            tsAppRScriptsDir = new File('web-app', 'dataExportRScripts')
+	        }
+	        if (!tsAppRScriptsDir.isDirectory()) {
+	            throw new RuntimeException('Could not determine proper for ' +
+	                    'com.recomdata.transmart.data.export.rScriptDirectory')
+	        }
+	        c.com.recomdata.transmart.data.export.rScriptDirectory = tsAppRScriptsDir.canonicalPath
         }
-        if (!tsAppRScriptsDir || !tsAppRScriptsDir.isDirectory()) {
-            tsAppRScriptsDir = servletContext.getRealPath('.') +
-                    '/../dataExportRScripts'
-            if (tsAppRScriptsDir) {
-                tsAppRScriptsDir = new File(tsAppRScriptsDir)
-            }
-        }
-        if (!tsAppRScriptsDir || !tsAppRScriptsDir.isDirectory()) {
-            tsAppRScriptsDir = new File('web-app', 'dataExportRScripts')
-        }
-        if (!tsAppRScriptsDir.isDirectory()) {
-            throw new RuntimeException('Could not determine proper for ' +
-                    'com.recomdata.transmart.data.export.rScriptDirectory')
-        }
-        c.com.recomdata.transmart.data.export.rScriptDirectory = tsAppRScriptsDir.canonicalPath
-
         logger.info("com.recomdata.transmart.data.export.rScriptDirectory = " +
                 "${c.com.recomdata.transmart.data.export.rScriptDirectory}")
 
         /* RModules.pluginScriptDirectory */
         val = c.RModules.pluginScriptDirectory
-        if (val) {
-            logger.warn("RModules.pluginScriptDirectory " +
-                    "should not be explicitly set, value '$val' ignored")
+        if (!val) {
+	           
+	        File rdcModulesDir = GrailsPluginUtils.getPluginDirForName('rdc-rmodules')?.file
+	        if (rdcModulesDir == null) {
+	            // it actually varies...
+	            rdcModulesDir = GrailsPluginUtils.getPluginDirForName('rdcRmodules')?.file
+	        }
+	        if (!rdcModulesDir) {
+	            String version = grailsApplication.mainContext.pluginManager.allPlugins.find {
+	                it.name == 'rdc-rmodules' || it.name == 'rdcRmodules'
+	            }.version
+	            def pluginsDir = servletContext.getRealPath('plugins')
+	            if (pluginsDir) {
+	                rdcModulesDir = new File(pluginsDir, "rdc-rmodules-$version")
+	            }
+	        }
+	        if (!rdcModulesDir) {
+	            throw new RuntimeException('Could not determine directory for ' +
+	                    'rdc-rmodules plugin')
+	        }
+	
+	        File rScriptsDir = new File(rdcModulesDir, 'Rscripts')
+	        if (!rScriptsDir || !rScriptsDir.isDirectory()) {
+	            rScriptsDir = new File(rdcModulesDir, 'web-app/Rscripts')
+	        }
+	        if (!rScriptsDir.isDirectory()) {
+	            throw new RuntimeException('Could not determine proper for ' +
+	                    'RModules.pluginScriptDirectory')
+	        }
+	        c.RModules.pluginScriptDirectory = rScriptsDir.canonicalPath + '/'
         }
-        File rdcModulesDir = GrailsPluginUtils.getPluginDirForName('rdc-rmodules')?.file
-        if (rdcModulesDir == null) {
-            // it actually varies...
-            rdcModulesDir = GrailsPluginUtils.getPluginDirForName('rdcRmodules')?.file
-        }
-        if (!rdcModulesDir) {
-            String version = grailsApplication.mainContext.pluginManager.allPlugins.find {
-                it.name == 'rdc-rmodules' || it.name == 'rdcRmodules'
-            }.version
-            def pluginsDir = servletContext.getRealPath('plugins')
-            if (pluginsDir) {
-                rdcModulesDir = new File(pluginsDir, "rdc-rmodules-$version")
-            }
-        }
-        if (!rdcModulesDir) {
-            throw new RuntimeException('Could not determine directory for ' +
-                    'rdc-rmodules plugin')
-        }
-
-        File rScriptsDir = new File(rdcModulesDir, 'Rscripts')
-        if (!rScriptsDir || !rScriptsDir.isDirectory()) {
-            rScriptsDir = new File(rdcModulesDir, 'web-app/Rscripts')
-        }
-        if (!rScriptsDir.isDirectory()) {
-            throw new RuntimeException('Could not determine proper for ' +
-                    'RModules.pluginScriptDirectory')
-        }
-        c.RModules.pluginScriptDirectory = rScriptsDir.canonicalPath + '/'
-
         logger.info("RModules.pluginScriptDirectory = " +
                 "${c.RModules.pluginScriptDirectory}")
     }
