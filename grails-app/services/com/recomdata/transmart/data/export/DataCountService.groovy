@@ -154,19 +154,8 @@ class DataCountService {
 		
 		if( !patientNums ) 
 			return 0
-		
-		// Find all low dimensional observations
-		// TODO: Include a check on only low dimensional data, by looking
-		//		 at the visual attributes of the concept
-		def rows = ObservationFact.createCriteria().list {
-			projections {
-				groupProperty("patient")
-				countDistinct("patient")
-			}
-			'in'( 'patient.id', patientNums )
-		}
-		
-		rows.size()
+            
+        return patientNums.size()
 	}
 
 
