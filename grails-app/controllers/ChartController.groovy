@@ -950,7 +950,7 @@ class ChartController {
         NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         Range r = rangeAxis.getRange();
-        Range s = new Range(0, r.getUpperBound() + r.getUpperBound() * 0.15);
+        Range s = new Range(0, r.getUpperBound() + r.getUpperBound() * 0.25 );
         rangeAxis.setRange(s);
         rangeAxis.setRangeType(RangeType.POSITIVE);
         rangeAxis.setLabel("Count of Observations");
