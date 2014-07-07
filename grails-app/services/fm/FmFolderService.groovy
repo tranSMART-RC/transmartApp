@@ -21,6 +21,10 @@ package fm
 
 import annotation.*
 import auth.AuthUser
+import auth.SecureObject
+import auth.SecureObjectAccess
+import auth.SecureAccessLevel
+import auth.Principal
 import bio.BioData
 
 import com.recomdata.transmart.domain.searchapp.AccessLog
@@ -595,7 +599,7 @@ class FmFolderService {
                     results += entry.value.collectEntries { [(it): 'ADMIN'] }
                 } else {
                     def studyId = studyFolderStudyIdMap[entry.key]
-                    def token = studyTokensMap[studyId]
+                    def token = studyTokensMap[studyId] ?: 'EXP:'+studyId
                     def accessLevelInfo = userAssignedTokens[token] ?: 'LOCKED'
                     results += entry.value.collectEntries { [(it): accessLevelInfo] }
                 }
@@ -607,7 +611,7 @@ class FmFolderService {
         results
     }
 
-    String getAccessLevelInfoForFolder(AuthUser user, FmFolder fmFolder) {
+    String getAccessLevelInfoForFolder(AuthUser user, FmFolder fmFolder) {springSecurityService.getPrincipal()
         def map = getAccessLevelInfoForFolders(user, [fmFolder])
         map ? map.values()[0] : null
     }
@@ -844,13 +848,27 @@ class FmFolderService {
 
         // If there is business object associated with folder, then save it and create association, if it does not exist.
         if (object != folder) {
-            //			log.info "FmFolderService.saveFolder object.properties = ${object.properties}"
-            object.save(flush: true, failOnError: true)
-            FmFolderAssociation folderAssoc = FmFolderAssociation.findByFmFolder(folder)
-            if (folderAssoc == null) {
-                BioData bioData = BioData.get(object.id)
-                folderAssoc = new FmFolderAssociation(objectUid: bioData.uniqueId, objectType: object.getClass().getName(), fmFolder: folder)
-                folderAssoc.save(flush: true, failOnError: true)
+            try{
+                //			log.info "FmFolderService.saveFolder object.properties = ${object.properties}"
+                object.save(flush: true, failOnError: true)
+                FmFolderAssociation folderAssoc = FmFolderAssociation.findByFmFolder(folder)
+                if (folderAssoc == null) {
+                    BioData bioData = BioData.get(object.id)
+                    folderAssoc = new FmFolderAssociation(objectUid: bioData.uniqueId, objectType: object.getClass().getName(), fmFolder: folder)
+                    folderAssoc.save(flush: true, failOnError: true)
+                    if (bioData.type == "BIO_EXPERIMENT"){ // create security for the study
+                        SecureObject secureObject = new SecureObject(bioDataId: bioData.id, displayName: folder.parent.folderName + " - "+folder.folderName, dataType: "BIO_CLINICAL_TRIAL", bioDataUniqueId: bioData.uniqueId)
+                        secureObject.save(flush: true, failOnError: true)
+                        //Add current user permission for this study
+                        SecureObjectAccess soa = new SecureObjectAccess(principal:Principal.findById(springSecurityService.getPrincipal().id), 
+                        secureObject: secureObject, accessLevel: SecureAccessLevel.findByAccessLevelName("OWN"))
+                        soa.save(flush: true, failOnError: true)
+                    }
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+                log.error("Object cannot be saved. Deleting folder "+folder.id)
+                folder.delete();
             }
         }
     }

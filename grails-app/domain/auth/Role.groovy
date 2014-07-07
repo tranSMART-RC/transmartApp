@@ -37,7 +37,7 @@ class Role {
     static def DS_EXPLORER_ROLE = "ROLE_DATASET_EXPLORER_ADMIN"
     static def PUBLIC_USER_ROLE = "ROLE_PUBLIC_USER"
     static def TRAINING_USER_ROLE = "ROLE_TRAINING_USER"
-
+    static def ROLE_ADVANCED_USER = "ROLE_ADVANCED_USER"
 
     static hasMany = [people: AuthUser]
 

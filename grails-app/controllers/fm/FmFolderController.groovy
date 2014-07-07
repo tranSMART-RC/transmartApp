@@ -253,6 +253,9 @@ class FmFolderController {
 
     def save = {
         log.info params
+        if(!isAdmin()){
+            return
+         }
         def fmFolderInstance = new FmFolder(params)
         if (fmFolderInstance.save(flush: true)) {
             redirect(action: "show", id: fmFolderInstance.id)
@@ -264,6 +267,9 @@ class FmFolderController {
     def saveProgram = {
         log.info "saveProgram called"
         log.info params
+        if(!isAdmin()){
+           return
+        }
 
         def folder = new FmFolder(params)
         folder.folderLevel = 0
@@ -291,7 +297,9 @@ class FmFolderController {
     def saveStudy = {
         log.info "saveStudy called"
         log.info params
-
+        if(!isAdmin()){
+            return
+         }
         def parentFolder = FmFolder.get(params.parentId)
         if (!parentFolder) {
             log.error "Parent folder is null"
@@ -332,7 +340,9 @@ class FmFolderController {
     def saveAssay = {
         log.info "saveAssay called"
         log.info params
-
+        if(!isAdmin()){
+            return
+         }
         def parentFolder = FmFolder.get(params.parentId)
         if (!parentFolder) {
             log.error "Parent folder is null"
@@ -368,7 +378,9 @@ class FmFolderController {
     def saveAnalysis = {
         log.info "saveAnalysis called"
         log.info params
-
+        if(!isAdmin()){
+            return
+         }
         def parentFolder = FmFolder.get(params.parentId)
         if (!parentFolder) {
             log.error "Parent folder is null"
@@ -413,7 +425,9 @@ class FmFolderController {
     def saveFolder = {
         log.info "saveFolder called"
         log.info params
-
+        if(!isAdmin()){
+            return
+         }
         def parentFolder = FmFolder.get(params.parentId)
         if (!parentFolder) {
             log.error "Parent folder is null"
@@ -734,8 +748,6 @@ class FmFolderController {
                     [fn: oldFullName + "%"])
 
             subFolderList.each {
-
-                println it
                 def folderLevelDifferential = it.folderLevel - oldLevel
                 // it.folderLevel =
                 // it.folderFullName =
@@ -759,7 +771,6 @@ class FmFolderController {
                     [fn: folder.folderFullName + "%", fl: (folder.folderLevel + 1)])
 
             subFolderList.each {
-                println it
                 removeFolder(it.id)
             }
 
@@ -974,7 +985,7 @@ class FmFolderController {
                 searchHighlight = solrFacetService.getSearchHighlight(folder, categoryList)
             }
         }
-
+		
         log.debug "FolderInstance = ${bioDataObject}"
         def useMongo=grailsApplication.config.fr.sanofi.mongoFiles.enableMongo
         render template: '/fmFolder/folderDetail',
@@ -1435,7 +1446,7 @@ class FmFolderController {
     private boolean isAdmin() {
         if ("anonymousUser" != springSecurityService.getPrincipal()) {
             def user = AuthUser.findByUsername(springSecurityService.getPrincipal().username)
-            if (!user.isAdmin()) {
+            if (!user.isAdmin() && !user.isAdvancedUser()) {
                 render(status: 200, text: "You do not have permission to edit this object's metadata.")
                 return false
             }
