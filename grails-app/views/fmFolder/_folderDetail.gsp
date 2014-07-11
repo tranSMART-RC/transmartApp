@@ -52,7 +52,7 @@
         <div style="float: right">
         <%-- Add buttons here depending on folder type --%>
 
-            <sec:ifAnyGranted roles="ROLE_ADMIN">
+            <sec:ifAnyGranted roles="ROLE_ADMIN, ROLE_ADVANCED_USER">
                 <g:if test="${folder.folderType.equalsIgnoreCase(FolderType.PROGRAM.name())}">
                     <span name="${folder.id}"
                           class="greybutton buttonicon addstudy">Add new study</span>
@@ -151,7 +151,7 @@
                 <th class="columnheader">
                     Value
                 <%-- Restrict edits to administrators --%>
-                    <sec:ifAnyGranted roles="ROLE_ADMIN">
+                    <sec:ifAnyGranted roles="ROLE_ADMIN, ROLE_ADVANCED_USER">
                         <img align="right" class="editmetadata"
                              name="${folder?.id}"
                              src="${resource(dir: 'images', file: 'pencil.png')}"/>

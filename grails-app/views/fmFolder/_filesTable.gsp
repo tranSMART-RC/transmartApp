@@ -40,7 +40,7 @@
                <td class="columnvalue">
 	               <div>
 	                    <span class="exportaddspan foldericon add link" name="${fmFile.id}">Add to export</span>
-	                    <sec:ifAnyGranted roles="ROLE_ADMIN">
+	                    <sec:ifAnyGranted roles="ROLE_ADMIN, ROLE_ADVANCED_USER">
 	                    	<span class="deletefilespan foldericon delete link" name="${fmFile.id}"> Delete</span>
 	                    </sec:ifAnyGranted>
 	               </div>

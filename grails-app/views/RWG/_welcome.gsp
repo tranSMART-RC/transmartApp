@@ -6,7 +6,7 @@
 <p>The <b>Analyze</b> window lets you perform a number of analyses either on studies selected in the Browse window, or from the global search box located in the top ribbon of your screen.  More information about the analyses you can perform is available in the “Help” section of the "Utilities" menu.
 </div>
 
-<sec:ifAnyGranted roles="ROLE_ADMIN">
+<sec:ifAnyGranted roles="ROLE_ADMIN, ROLE_ADVANCED_USER">
 	<div style="padding: 0px 16px 16px 16px; border-radius: 8px; border: 1px solid #DDD; width: 20%">
 		<h4>Admin Tools</h4>
 		<span class="greybutton buttonicon addprogram">Add new program</span>
