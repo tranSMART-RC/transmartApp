@@ -100,3 +100,7 @@ td {
     height:24px;
     z-index:100;
 }
+
+.help {
+    display:none;
+}

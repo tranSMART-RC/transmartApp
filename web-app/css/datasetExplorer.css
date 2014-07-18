@@ -196,11 +196,13 @@ div.analysistitle {
 .contextHelpBtn {
 	background-image:url(../images/help/helpicon_gray.jpg ) !important;
 	color:#ff0000;	
+	display:none;
 }
 	
 .x-tool-sampleExplorerHelpButton {
 	background-image:url(../images/help/helpicon_gray.jpg ) !important;
-	color:#ff0000;	
+	color:#ff0000;
+	display:none;	
 }
 
 table.detail {
@@ -377,6 +379,7 @@ content: counter(pages);
 .x-tool-help {
 	background-image: url("../images/help/tool-sprites-rdc.gif");
     background-position: 0 -300px;
+    display:none;
 }
 
 .flatbutton {
@@ -470,3 +473,8 @@ li.x-tab-strip-active {
 
 .x-grid3-row .conceptUnselected, .x-grid3-row .conceptSelected {padding: 0 0 5px 5px; font-size: .85em;}
 .data-export-filter-tip {color: #666; font-style: italic}
+
+.help {
+	display:none;
+}
+

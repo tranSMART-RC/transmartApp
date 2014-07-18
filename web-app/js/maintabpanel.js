@@ -303,7 +303,8 @@ function createMainToolbar() {
 			    	D2H_ShowHelp(filterContextHelpId,helpURL,"wndExternal",CTXT_DISPLAY_FULLHELP );
 			    },
 	            cls: "x-btn-text-icon",
-	            iconCls: "contextHelpBtn"  
+	            iconCls: "contextHelpBtn",
+                baseCls: 'help'
 		   },
 		   {
                xtype: "tbfill"

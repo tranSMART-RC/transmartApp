@@ -132,7 +132,8 @@ function exportjobsstoreLoaded()
             iconCls: "contextHelpBtn",
             handler: function(event, toolEl, panel){
 		    	D2H_ShowHelp("1456",helpURL,"wndExternal",CTXT_DISPLAY_FULLHELP );
-		    }
+		    },
+		    baseCls: 'help'
         }]
 	});                
     analysisExportJobsPanel.add(jobs);

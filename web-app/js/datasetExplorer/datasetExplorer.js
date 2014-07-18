@@ -375,7 +375,8 @@ Ext.onReady(function () {
                             disabled: false,
                             handler: function () {
                                 D2H_ShowHelp("1258", helpURL, "wndExternal", CTXT_DISPLAY_FULLHELP);
-                            }
+                            },
+                            baseCls: 'help'
                         }
                     )
                 ]
@@ -480,7 +481,8 @@ Ext.onReady(function () {
                         handler: function (event, toolEl, panel) {
                             D2H_ShowHelp("1074", helpURL, "wndExternal", CTXT_DISPLAY_FULLHELP);
                         },
-                        hidden: true
+                        hidden: true,
+                        baseCls: 'help'
                     }
                 ]
             }
@@ -530,7 +532,7 @@ Ext.onReady(function () {
                     }
                 },
                 deactivate: function () {
-                    resultsTabPanel.tools.help.dom.style.display = "none";
+                    resultsTabPanel.tools.help.dom.style.hidden = true;
                 },
                 'afterLayout': {
                     fn: function (el) {
@@ -927,7 +929,8 @@ Ext.onReady(function () {
                             qtip: 'Click for context sensitive help',
                             handler: function (event, toolEl, panel) {
                                 D2H_ShowHelp("1239", helpURL, "wndExternal", CTXT_DISPLAY_FULLHELP);
-                            }
+                            },
+                            baseCls: 'help'
                         }
                     ]
 
@@ -1635,7 +1638,8 @@ function getSubCategories(ontresponse) {
             handler: function (event, toolEl, panel) {
                 D2H_ShowHelp((id_in == "navigateTermsPanel") ? "1066" : "1091", helpURL, "wndExternal", CTXT_DISPLAY_FULLHELP);
             },
-            iconCls: "contextHelpBtn"
+            iconCls: "contextHelpBtn",
+            baseCls: 'help'
         }
     ]);
 
@@ -2739,7 +2743,8 @@ function showSNPViewerSelection() {
                 qtip: 'Click for context sensitive help',
                 handler: function (event, toolEl, panel) {
                     D2H_ShowHelp("1360", helpURL, "wndExternal", CTXT_DISPLAY_FULLHELP);
-                }
+                },
+                baseCls: 'help'
             }
         ]
     });
@@ -2856,7 +2861,8 @@ function showIgvSelection() {
                 qtip: 'Click for context sensitive help',
                 handler: function (event, toolEl, panel) {
                     D2H_ShowHelp("1427", helpURL, "wndExternal", CTXT_DISPLAY_FULLHELP);
-                }
+                },
+                baseCls: 'help'
             }
         ]
     });
@@ -2975,7 +2981,8 @@ function showPlinkSelection() {
                 handler: function (event, toolEl, panel) {
                     // 1360 needs to be changed for PLINK
                     D2H_ShowHelp("1360", helpURL, "wndExternal", CTXT_DISPLAY_FULLHELP);
-                }
+                },
+                baseCls: 'help'
             }
         ]
     });
@@ -3050,7 +3057,8 @@ function showGwasSelection() {
                 handler: function (event, toolEl, panel) {
                     // 1360 needs to be changed for PLINK
                     D2H_ShowHelp("1360", helpURL, "wndExternal", CTXT_DISPLAY_FULLHELP);
-                }
+                },
+                baseCls: 'help'
             }
         ]
     });
@@ -3415,7 +3423,7 @@ function getExportButtonSecurityComplete(result) {
 }
 
 function activateTab(tab) {
-    resultsTabPanel.tools.help.dom.style.display = "";
+    resultsTabPanel.tools.help.dom.style.hidden = false;
 }
 
 function getSummaryGridData() {
@@ -3730,7 +3738,8 @@ function showHaploviewGeneSelection() {
                 qtip: 'Click for context sensitive help',
                 handler: function (event, toolEl, panel) {
                     D2H_ShowHelp("1174", helpURL, "wndExternal", CTXT_DISPLAY_FULLHELP);
-                }
+                },
+                baseCls: 'help'
             }
         ]
     });
@@ -3908,7 +3917,8 @@ function saveComparisonComplete(result) {
                 disabled: false,
                 handler: function () {
                     D2H_ShowHelp("1474", helpURL, "wndExternal", CTXT_DISPLAY_FULLHELP);
-                }
+                },
+                baseCls: 'help'
             }
         ],
         resizable: true,

@@ -128,7 +128,8 @@ function createCenterPanel()
 									handler : function()
 									{
 									    D2H_ShowHelp("1438",helpURL,"wndExternal",CTXT_DISPLAY_FULLHELP );
-									}
+									},
+		                            baseCls: 'help'
 								}
 						)						
 						

@@ -476,7 +476,8 @@ function showGeneSelection()
 		qtip:'Click for context sensitive help',
 		handler: function(event, toolEl, panel){
 			D2H_ShowHelp(advancedWorkflowContextHelpId, helpURL,"wndExternal",CTXT_DISPLAY_FULLHELP );
-		    }
+		    },
+            baseCls: 'help'
 		}]
 		});
 	}
