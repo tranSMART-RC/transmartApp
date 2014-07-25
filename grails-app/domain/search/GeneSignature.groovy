@@ -98,47 +98,47 @@ class GeneSignature implements Cloneable, IDomainExcelWorkbook {
         id generator: 'sequence', params: [sequence: 'SEQ_SEARCH_DATA_ID']
         geneSigItems sort: 'foldChgMetric'
         columns {
-            id column: 'SEARCH_GENE_SIGNATURE_ID'
+           id column: 'SEARCH_GENE_SIGNATURE_ID'
             name column: 'NAME'
             description column: 'DESCRIPTION'
             uploadFile column: 'UPLOAD_FILE'
-            fileSchema column: 'SEARCH_GENE_SIG_FILE_SCHEMA_ID'
-            foldChgMetricConceptCode column: 'FOLD_CHG_METRIC_CONCEPT_ID'
-            analyticCatConceptCode column: 'ANALYTIC_CAT_CONCEPT_ID'
+            fileSchema column: 'SEARCH_GENE_SIG_FILE_SCHEMA_ID', lazy: false
+            foldChgMetricConceptCode column: 'FOLD_CHG_METRIC_CONCEPT_ID', lazy: false
+            analyticCatConceptCode column: 'ANALYTIC_CAT_CONCEPT_ID', lazy: false
             analyticCatOther column: 'ANALYTIC_CAT_OTHER'
-            techPlatform column: 'BIO_ASSAY_PLATFORM_ID'
+            techPlatform column: 'BIO_ASSAY_PLATFORM_ID', lazy: false
             analystName column: 'ANALYST_NAME'
-            normMethodConceptCode column: 'NORM_METHOD_CONCEPT_ID'
+            normMethodConceptCode column: 'NORM_METHOD_CONCEPT_ID', lazy: false
             normMethodOther column: 'NORM_METHOD_OTHER'
-            analysisMethodConceptCode column: 'ANALYSIS_METHOD_CONCEPT_ID'
+            analysisMethodConceptCode column: 'ANALYSIS_METHOD_CONCEPT_ID', lazy: false
             analysisMethodOther column: 'ANALYSIS_METHOD_OTHER'
             multipleTestingCorrection column: 'MULTIPLE_TESTING_CORRECTION'
-            pvalueCutoffConceptCode column: 'P_VALUE_CUTOFF_CONCEPT_ID'
+            pValueCutoffConceptCode column: 'P_VALUE_CUTOFF_CONCEPT_ID', lazy: false
             uniqueId column: 'UNIQUE_ID'
             dateCreated column: 'CREATE_DATE'
-            createdByAuthUser column: 'CREATED_BY_AUTH_USER_ID'
+            createdByAuthUser column: 'CREATED_BY_AUTH_USER_ID', lazy: false
             lastUpdated column: 'LAST_MODIFIED_DATE'
-            modifiedByAuthUser column: 'MODIFIED_BY_AUTH_USER_ID'
+            modifiedByAuthUser column: 'MODIFIED_BY_AUTH_USER_ID', lazy: false
             versionNumber column: 'VERSION_NUMBER'
             publicFlag column: 'PUBLIC_FLAG'
             deletedFlag column: 'DELETED_FLAG'
-            parentGeneSignature column: 'PARENT_GENE_SIGNATURE_ID'
-            sourceConceptCode column: 'SOURCE_CONCEPT_ID'
+            parentGeneSignature column: 'PARENT_GENE_SIGNATURE_ID', lazy: false
+            sourceConceptCode column: 'SOURCE_CONCEPT_ID', lazy: false
             sourceOther column: 'SOURCE_OTHER'
-            ownerConceptCode column: 'OWNER_CONCEPT_ID'
+            ownerConceptCode column: 'OWNER_CONCEPT_ID', lazy: false
             stimulusDescription column: 'STIMULUS_DESCRIPTION'
             stimulusDosing column: 'STIMULUS_DOSING'
             treatmentDescription column: 'TREATMENT_DESCRIPTION'
             treatmentDosing column: 'TREATMENT_DOSING'
-            treatmentCompound column: 'TREATMENT_BIO_COMPOUND_ID'
+            treatmentCompound column: 'TREATMENT_BIO_COMPOUND_ID', lazy: false
             treatmentProtocolNumber column: 'TREATMENT_PROTOCOL_NUMBER'
             pmIds column: 'PMID_LIST'
-            speciesConceptCode column: 'SPECIES_CONCEPT_ID'
-            speciesMouseSrcConceptCode column: 'SPECIES_MOUSE_SRC_CONCEPT_ID'
+            speciesConceptCode column: 'SPECIES_CONCEPT_ID', lazy: false
+            speciesMouseSrcConceptCode column: 'SPECIES_MOUSE_SRC_CONCEPT_ID', lazy: false
             speciesMouseDetail column: 'SPECIES_MOUSE_DETAIL'
-            tissueTypeConceptCode column: 'TISSUE_TYPE_CONCEPT_ID'
-            experimentTypeConceptCode column: 'EXPERIMENT_TYPE_CONCEPT_ID'
-            experimentTypeCellLine column: 'EXPERIMENT_TYPE_CELL_LINE_ID'
+            tissueTypeConceptCode column: 'TISSUE_TYPE_CONCEPT_ID', lazy: false
+            experimentTypeConceptCode column: 'EXPERIMENT_TYPE_CONCEPT_ID', lazy: false
+            experimentTypeCellLine column: 'EXPERIMENT_TYPE_CELL_LINE_ID', lazy: false
             experimentTypeInVivoDescr column: 'EXPERIMENT_TYPE_IN_VIVO_DESCR'
             experimentTypeATCCRef column: 'EXPERIMENT_TYPE_ATCC_REF'
         }
@@ -222,11 +222,9 @@ class GeneSignature implements Cloneable, IDomainExcelWorkbook {
      * cloneable interface implementation
      */
     def clone() {
-
-        // clone object using a map of params
-        Map params = createParamMap();
         GeneSignature clone = new GeneSignature();
-        clone.properties = params;
+        copyPropertiesTo(clone)
+        
         return clone;
     }
 
