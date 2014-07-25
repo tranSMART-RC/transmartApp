@@ -180,7 +180,7 @@
 			<td class="value">
 				<g:select name="pvalueCutoffConceptCode.id"
     				      from="${wizard.pValCutoffs}"
-    				      value="${existingValues.'pValueCutoffConceptCode.id'}"
+    				      value="${existingValues.'pvalueCutoffConceptCode.id'}"
          				  noSelection="['null':'select p-value cutoff']"
          				  optionValue="codeName"
          				  optionKey="id" />

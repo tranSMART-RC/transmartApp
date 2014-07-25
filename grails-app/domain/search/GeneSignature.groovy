@@ -113,7 +113,7 @@ class GeneSignature implements Cloneable, IDomainExcelWorkbook {
             analysisMethodConceptCode column: 'ANALYSIS_METHOD_CONCEPT_ID', lazy: false
             analysisMethodOther column: 'ANALYSIS_METHOD_OTHER'
             multipleTestingCorrection column: 'MULTIPLE_TESTING_CORRECTION'
-            pValueCutoffConceptCode column: 'P_VALUE_CUTOFF_CONCEPT_ID', lazy: false
+            pvalueCutoffConceptCode column: 'P_VALUE_CUTOFF_CONCEPT_ID', lazy: false
             uniqueId column: 'UNIQUE_ID'
             dateCreated column: 'CREATE_DATE'
             createdByAuthUser column: 'CREATED_BY_AUTH_USER_ID', lazy: false

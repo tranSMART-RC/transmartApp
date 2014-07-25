@@ -912,7 +912,7 @@ class GeneSignatureController {
                 existingValues.put('analyticCatConceptCode.bioConceptCode', gs.analyticCatConceptCode?.bioConceptCode ?: '')
                 existingValues.put('analysisMethodConceptCode.id', gs.analysisMethodConceptCode?.id ?: '')
                 existingValues.put('analysisMethodConceptCode.bioConceptCode', gs.analysisMethodConceptCode?.bioConceptCode ?: '')
-                existingValues.put('pValueCutoffConceptCode.id', gs.pValueCutoffConceptCode?.id ?: '')
+                existingValues.put('pvalueCutoffConceptCode.id', gs.pvalueCutoffConceptCode?.id ?: '')
                 existingValues.put('fileSchema.id', gs.fileSchema?.id ?: '')
                 existingValues.put('foldChgMetricConceptCode.id', gs.foldChgMetricConceptCode?.id ?: '')
                 break
