@@ -41,6 +41,7 @@
 
 <div style="margin:10px;padding:10px;">
     <g:hiddenField name="parentId" value="${folder?.parentId}"/>
+    <g:hiddenField name="folderName" value="${folder.folderName}" /> 
 
     <div>
         <div style="float: right">
@@ -67,6 +68,9 @@
                     <g:if test="${folder.folderType.equalsIgnoreCase(FolderType.FOLDER.name()) && folder.parent?.folderType.equalsIgnoreCase(FolderType.STUDY.name())}">
                         <span name="${folder.id}"
                               class="greybutton buttonicon addanalysis">Add new analysis</span>
+                    </g:if>
+                    <g:if test="${folder.folderType.equalsIgnoreCase(FolderType.FOLDER.name()) && useMongo}">
+                        <span name="${folder.id}" class="greybutton buttonicon uploadfiles">Upload files</span>
                     </g:if>
                     <span name="${folder.id}"
                           class="greybutton buttonicon addfolder">Add new folder</span>

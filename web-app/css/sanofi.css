@@ -284,6 +284,7 @@ table.menuDetail th.menuVisited {
 .greybutton.addanalysis { background-image: url('../images/addanalysis.png'); }
 .greybutton.close { background-image: url('../images/small_cross.png'); }
 .greybutton.deletefolder { background-image: url('../images/bin_closed.png'); }
+.greybutton.uploadfiles { background-image: url('../images/text.png'); } 
 
 .greybutton.disabled {
 	cursor: normal;
@@ -498,6 +499,13 @@ textarea#description, textarea#longDescription, input#description, input#longDes
 	height: 80%;
 }
 
+#uploadFilesOverlay {
+    top: 10%;
+    left: 20%;
+    width: 60%;
+    height: 80%;
+} 
+
 #filter-browser {
 	font-size: 8pt;
 	font-family: Verdana, Arial, sans-serif;
@@ -522,6 +530,14 @@ textarea#description, textarea#longDescription, input#description, input#longDes
 .exporttable td {
 	padding: 4px;
 	border-bottom: 1px solid #DDD;	
+}
+
+uploadtable {
+    margin-top: 20px;
+}
+#uploadtable td {
+    padding: 4px;
+    border-bottom: 1px solid #DDD;
 }
 
 .editmetadata {
