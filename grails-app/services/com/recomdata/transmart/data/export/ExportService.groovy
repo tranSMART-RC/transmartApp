@@ -32,6 +32,7 @@ import org.quartz.JobDetail
 import org.quartz.SimpleTrigger
 import grails.util.Holders
 import org.transmartproject.core.dataquery.highdim.assayconstraints.AssayConstraint
+import grails.converters.JSON
 
 class ExportService {
 
@@ -239,29 +240,24 @@ class ExportService {
         //Prepare a map like ['subset1'
         selectedCheckboxList.each { checkboxItem ->
             //Split the item by "_" to get the different attributes.
-            String[] checkboxItemArray = checkboxItem.split("_")
+            def checkbox = JSON.parse(checkboxItem.toString())
             String currentSubset = null
-            if (checkboxItemArray.size() > 0) {
+            if (checkbox.subset) {
                 //The first item is the subset name.
-                currentSubset = checkboxItemArray[0].trim().replace(" ", "")
+                currentSubset = checkbox.subset.trim().replace(" ","")
                 if (null == subsetSelectedFilesMap.get(currentSubset)) subsetSelectedFilesMap.put(currentSubset, ["STUDY"])
             }
 
-            if (checkboxItemArray.size() > 1) {
+            if (checkbox.dataTypeId) {
                 //Second item is the data type.
-                String currentDataType = checkboxItemArray[1].trim()
-                if (checkboxItemArray.size() > 4) {
-                    def jobDataType = currentDataType + "_"+ checkboxItemArray[2].trim() + checkboxItemArray[3].trim()
+                String currentDataType = checkbox.dataTypeId.trim()
+                if (checkbox.gplId) {
+                    def jobDataType = currentDataType+checkbox.fileType.trim()
                     if (!subsetSelectedFilesMap.get(currentSubset)?.contains(jobDataType)) {
                         subsetSelectedFilesMap.get(currentSubset).push(jobDataType)
                     }
-                } else if (checkboxItemArray.size() > 3) {
-                    def jobDataType = currentDataType + checkboxItemArray[2].trim()
-                    if (!subsetSelectedFilesMap.get(currentSubset)?.contains(jobDataType)) {
-                        subsetSelectedFilesMap.get(currentSubset).push(jobDataType)
-                    }
-                } else if (checkboxItemArray.size() > 2) {
-                    subsetSelectedFilesMap.get(currentSubset)?.push(currentDataType + checkboxItemArray[2].trim())
+                } else if (checkbox.dataTypeId) {
+                    subsetSelectedFilesMap.get(currentSubset)?.push(currentDataType+checkbox.fileType.trim())
                 } else {
                     subsetSelectedFilesMap.get(currentSubset)?.push(currentDataType)
                 }
@@ -276,15 +272,15 @@ class ExportService {
         //Split the list on commas first, each box is seperated by ",".
         checkboxList.each { checkboxItem ->
             //Split the item by "_" to get the different attributes.
-            String[] checkboxItemArray = StringUtils.split(checkboxItem, "_")
+            def checkbox = JSON.parse(checkboxItem.toString())
 
             //The first item is the subset name.
-            def currentSubset = checkboxItemArray[0].trim().replace(" ", "")
+            def currentSubset = checkbox.subset.trim().replace(" ", "")
 
             //Fourth item is the selected (gpl) platform
-            if (checkboxItemArray.size() > 3) {
-                def fileName = checkboxItemArray[1].trim() + checkboxItemArray[2].trim()
-                def platform = checkboxItemArray[3].trim()
+            if (checkbox.gplId) {
+                def fileName = checkbox.dataTypeId.trim() + checkbox.fileType.trim()
+                def platform = checkbox.gplId.trim()
                 if (subsetSelectedPlatformsByFiles.containsKey(currentSubset)) {
                     if (subsetSelectedPlatformsByFiles.get(currentSubset).containsKey(fileName)) {
                         def platformFilesList = subsetSelectedPlatformsByFiles.get(currentSubset).get(fileName)
