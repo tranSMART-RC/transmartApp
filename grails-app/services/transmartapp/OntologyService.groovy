@@ -76,7 +76,7 @@ class OntologyService {
             log.debug(nodeQuery)
 
             myCount = i2b2.OntNode.executeQuery(countQuery)[0]
-            myNodes = i2b2.OntNode.executeQuery(nodeQuery, [max: 100])
+            myNodes = i2b2.OntNode.executeQuery(nodeQuery, [max: 1000])
 
         } else {
 
@@ -89,7 +89,7 @@ class OntologyService {
 
             def nodeQuery = "SELECT o from i2b2.OntNode o WHERE o.sourcesystemcd IN (:scdArg) AND (_searchterms_) AND o.visualattributes NOT like '" + visualAttrHiddenWild + "'"
             nodeQuery = nodeQuery.replace("_searchterms_", searchtermstring)
-            myNodes = i2b2.OntNode.executeQuery(nodeQuery, [scdArg: allSystemCds], [max: 100])
+            myNodes = i2b2.OntNode.executeQuery(nodeQuery, [scdArg: allSystemCds], [max: 1000])
         }
         //}
 
@@ -130,7 +130,7 @@ class OntologyService {
             if (myCount < 100) {
                 resulttext = "Found " + myCount + " results."
             } else {
-                resulttext = "Returned first 100 of " + myCount + " results."
+                resulttext = "Returned first 1000 of " + myCount + " results."
             }
 
             def result = [concepts: concepts, resulttext: resulttext]
