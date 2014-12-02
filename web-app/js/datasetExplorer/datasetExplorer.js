@@ -3845,6 +3845,7 @@ function workflowStatusUpdate(result) {
 }
 
 function showWorkflowResult(result) {
+    alert('dfvdsdf')
     var response = eval("(" + result.responseText + ")");
     var jobNumber = response.jobNumber;
     var viewerURL = response.viewerURL;
@@ -3969,3 +3970,316 @@ function contains(a, obj) {
     }
     return false;
 }
+
+    /**
+     * Create menus for export to omnisoft
+     * @param subset1DivId
+     * @param subset1DivId
+     */
+function createOmnisoftExportMenu(subset1DivId, subset2DivId) {
+
+        var omnisoftExportMenuSub1 = new Ext.menu.Menu(
+            {
+                id: 'omnisoftExportMenuDivSub1',
+                width: 145,
+                items: [
+                    {
+                        text: 'Clinical',
+                        handler: function () {
+                            exportOmnisoftData(1, 1);
+                        }
+                    },
+                    {
+                        text: 'Biomarker',
+                        handler: function () {
+                            exportOmnisoftData(1, 2);
+                        }
+                    },
+                    /*{
+                        text: 'SNP',
+                        handler: function () {
+                            exportOmnisoftData(1, 3);
+                        }
+                    },*/
+
+                    {
+                        text: 'OmicSoft project (zip)',
+                        handler: function () {
+                            exportOmnisoftData(1, 4);
+                        }
+                    },
+                    {
+                        text: 'OmicSoft project',
+                        handler: function () {
+                            exportOmnisoftData(1, 5);
+                        }
+                    }
+                ]
+            });
+
+        var omnisoftExportButtonSub1 =
+            new Ext.Toolbar.Button(
+                {
+                    text: 'Export to OmicSoft',
+                    renderTo: subset1DivId,
+                    menu: omnisoftExportMenuSub1
+                });
+
+
+        var omnisoftExportMenuSub2 = new Ext.menu.Menu(
+            {
+
+                id: 'omnisoftExportMenuDivSub2',
+                width: 145,
+                items: [
+                    {
+                        text: 'Clinical',
+                        //href: contact
+                        handler: function () {
+                            exportOmnisoftData(2, 1);
+                        }
+                    },
+                    {
+                        text: 'Biomarker',
+                        handler: function () {
+                            exportOmnisoftData(2, 2);
+                        }
+                    },
+                    /*{
+                        text: 'SNP',
+                        handler: function () {
+                            exportOmnisoftData(2, 3);
+                        }
+                    },*/
+                    {
+                       text: 'OmicSoft project (zip)',
+                       handler: function () {
+                            exportOmnisoftData(2, 4);
+                        }
+                    },
+                    {
+                        text: 'OmicSoft project',
+                        handler: function () {
+                            exportOmnisoftData(2, 5);
+                        }
+                    }
+
+                ]
+            });
+
+        var omnisoftExportButtonSub2 =
+            new Ext.Toolbar.Button(
+                {
+                    text: 'Export to OmicSoft',
+                    renderTo: subset2DivId,
+                    menu: omnisoftExportMenuSub2
+                });
+
+}
+var exportPanelMask;
+
+    /**
+     *
+     * @param subsetId  1 or 2
+     * @param exportType 1 - clinical, 2 - biomarker, 3 - snp
+     */
+function exportOmnisoftData(subset, exportType) {
+
+        // call request to i2b2 to get result_instance_id
+        var query = getCRCQueryRequest(subset);
+
+        exportPanelMask = new Ext.LoadMask(Ext.get('queryPanel'), {msg: "Please wait..."});
+        exportPanelMask.show();
+        Ext.Ajax.request(
+            {
+                url:pageInfo.basePath + "/queryTool/runQueryFromDefinition",
+                method : 'POST',
+                xmlData : query,
+                success : function(result, request)
+                {
+                    exportOmnisoftDataSubsets(subset, exportType);
+                }
+                ,
+                failure : function(result, request)
+                {
+                    alert('Error while getting result instance.')
+                }
+                ,
+                timeout : '600000'
+            }
+        );  // Ext.Ajax.request(
+} // function exportOmnisoftData(subset, exportType) {
+
+
+function exportOmnisoftDataSubsets(subset, exportType)
+{
+    if(isSubsetEmpty(subset))
+    {
+        Ext.Msg.alert('Missing input!','Please select a cohort from the \'Comparison\' tab.');
+        return;
+    }
+
+    if(!isSubsetEmpty(subset) && GLOBAL.CurrentSubsetIDs[subset] == null)
+    {
+        runAllQueries(function(){
+            exportPanelMask = new Ext.LoadMask(Ext.get('queryPanel'), {msg: "Please wait..."});
+            exportPanelMask.show();
+            exportOmnisoftDataSubsets(subset, exportType);
+        });
+        return;
+    }
+    var resultInstanceId= GLOBAL.CurrentSubsetIDs[subset];
+    //var resultInstanceId = result.responseXML.selectSingleNode("//result_instance_id").firstChild.nodeValue;
+   // alert('resultInstanceid = ' + resultInstanceId);
+    getOmicsoftJobName(resultInstanceId, subset, exportType);
+
+}
+
+    /**
+     *  Get name of job with exported data.
+     * @param resultInstanceId
+     * @param subset
+     * @param exportType
+     */
+function getOmicsoftJobName(resultInstanceId, subset, exportType) {
+
+        Ext.Ajax.request(
+            {
+                url : pageInfo.basePath + "/omicsoftExport/doExport",
+                method : 'POST',
+                params: {
+                    result_instance_id: resultInstanceId,
+                    subset_id: subset,
+                    export_type: exportType
+                },
+                success : function(result, request)
+                {
+                    //alert(result.toSource())
+                    //alert(result.responseText)
+                    if (result.responseText == 'success') {
+                        checkOmicsoftProjectExportStatusStart = new Date();
+                        CheckOmicsoftProjectExportStatus(resultInstanceId, exportType);
+                    } else {
+                        alert('Error while getting job name for omicsoft export.');
+                        exportPanelMask.hide();
+                    }
+
+                    /*var jobName = result.responseText;
+                    alert('jobName = ' + jobName)
+                    if (typeof jobName != 'undefined' && jobName != "") {
+                        doOmicsoftExport(jobName);
+                    }
+                    else {
+                        alert('Error while getting job name for omicsoft export.');
+                    }
+                    exportPanelMask.hide();*/
+                }
+                ,
+                failure : function(result, request)
+                {
+                    alert('Error while getting job name for omicsoft export.');
+                    exportPanelMask.hide();
+                }
+                ,
+                timeout : '600000'
+            }
+        );  // Ext.Ajax.request(
+    } // function getOmicsoftJobName(
+
+    var checkOmicsoftProjectExportStatusStart;
+    function validExportTime() {
+        var t2 = new Date().getTime();
+        var t1 = checkOmicsoftProjectExportStatusStart.getTime();
+        return parseInt((t2-t1)/(60*1000)) < 20; //20 minutes
+}
+
+function CheckOmicsoftProjectExportStatus(resultInstanceid, jobType) {
+
+        console.log('CheckOmicsoftProjectExportStatus    //    resultInstanceid = ' + resultInstanceid)
+        Ext.Ajax.request({
+            url : pageInfo.basePath + "/omicsoftExport/checkOmicsoftProjectExport",
+            method : 'POST',
+            params: {
+                result_instance_id: resultInstanceid
+            },
+            //xmlData : getCRCQueryRequest(resultInstanceid),
+            success : function(result, request) {
+                if (!validExportTime()) {
+                    alert('Timeout error while getting job name for omicsoft export.');
+                    exportPanelMask.hide();
+                    return;
+                }
+                if (result.responseText == "pending") {
+                    setTimeout(function() {CheckOmicsoftProjectExportStatus(resultInstanceid, jobType);}, 500);
+                } else {
+                    var jobName = result.responseText;
+                    if (typeof jobName != 'undefined' && jobName != "" && jobName != "fail") {
+                        //alert('jobName = ' + jobName)
+                        doOmicsoftExport(jobName, jobType);
+                    } else {
+                        alert('Error while getting job name for omicsoft export.');
+                    }
+                    exportPanelMask.hide();
+                }
+            }
+            ,
+            failure : function(result, request) {
+                exportPanelMask.hide();
+                alert("CheckOmicsoftProjectExportStatus failure")
+            }
+        });
+} // function CheckOmicsoftProjectExportStatus(resultInstanceid)
+
+
+    /**
+     * Load file by jobName.
+     * @param jobName
+     */
+function doOmicsoftExport(jobName, jobType) {
+        var exportURL = pageInfo.basePath + "/omicsoftExport/downloadOmicsoftFile";
+        var body = Ext.getBody();
+        var form = document.getElementById('omicsoftExportForm');
+        if (form == null) {
+            form = body.createChild({
+                tag: 'form',
+                cls: 'x-hidden',
+                id: 'omicsoftExportForm',
+                action: exportURL,
+                method: 'post'
+            });
+
+            var jobNameField = new Ext.form.Field({
+                fieldLabel: '',
+                id: 'jobNameField',
+                name: 'filename',
+                labelSeparator: ' ',
+                boxLabel: '',
+                hidden: true,
+                value: jobName,
+                renderTo: form
+            });
+
+            var jobTypeField = new Ext.form.Field({
+                fieldLabel: '',
+                id: 'jobTypeField',
+                name: 'jobType',
+                labelSeparator: ' ',
+                boxLabel: '',
+                hidden: true,
+                value: jobType,
+                renderTo: form
+            });
+
+            form.dom.submit();
+        }
+        else {
+            var jobNameField = document.getElementById('jobNameField');
+            jobNameField.value = jobName;
+            var jobTypeField = document.getElementById('jobTypeField');
+            jobTypeField.value = jobType;
+
+            form.submit();
+        }
+} // function doOmicsoftExport(
+
+

@@ -107,11 +107,20 @@
   <div id='queryCriteriaDiv1_20' class="queryGroupInclude"></div></td>
   <td align="right">AND&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="btnExcludeGroup2_20" style="font:9pt tahoma;" onclick="excludeGroup(this, '2','20')">Exclude</button><button id="clearGroup2_20" style="font:9pt tahoma;" onclick="clearGroup('2','20')">X</button><br>
   <div id='queryCriteriaDiv2_20' class="queryGroupInclude"></div></td></tr>  
+
+  <tr><td align="center">
+  <div id="omnisoftExportMenuDivSub1" style="padding-top: 20px;"></div></td>
+  <td align="center">&nbsp;</td>
+  <td align="center">
+  <div id="omnisoftExportMenuDivSub2" style="padding-top: 20px;"></div></td></tr>
   </table>
   
   <div id="hiddenDragDiv" style="display:none"></div>
   <script type="text/javascript">
   	setupDragAndDrop();
   	hideCriteriaGroups();
+
+    createOmnisoftExportMenu('omnisoftExportMenuDivSub1', 'omnisoftExportMenuDivSub2');
+ //   createOmnisoftExportMenu('omnisoftExportMenuDivSub1', 'omnisoftExportMenuDivSub2');
   </script>
  

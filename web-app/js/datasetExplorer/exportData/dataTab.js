@@ -531,6 +531,26 @@ DataExport.prototype.getExportParams = function (gridPanel, selectedFiles) {
     return params;
 }
 
+DataExport.prototype.createDataExportOmicsoftJob=function() {
+    Ext.Ajax.request({
+        url: pageInfo.basePath+"/dataExport/createnewjob",
+        method: 'POST',
+        success: function(result, request){
+            //Handle data export process
+            runDataExportJob(result);
+        },
+        failure: function(result, request){
+            Ext.Msg.alert('Status', 'Unable to create data export job.');
+        },
+        timeout: '1800000',
+        params: {
+            querySummary1 : getQuerySummary(1),
+            querySummary2 : getQuerySummary(2),
+            analysis:  "DataExportOmicsoft"
+        }
+    });
+}
+
 /**
  * Run data export job
  * @param result
