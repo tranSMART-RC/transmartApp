@@ -251,8 +251,8 @@ class OmicsoftClinicalDataService extends DataExportService {
 			}
 
 			//filename = (studyList?.size() > 1) ? study+'_'+fileName : fileName
-			log.debug("Retrieving Clinical data : " + sqlQuery)
-			log.debug("Retrieving Clinical data : " + parameterList)
+			log.info("Retrieving Clinical data : " + sqlQuery)
+			log.info("Retrieving Clinical data : " + parameterList)
 
 			//Only pivot the data if the parameter specifies it.
 			if(parPivotData)
@@ -283,8 +283,8 @@ class OmicsoftClinicalDataService extends DataExportService {
 			}
 		}
 		//return dataFound
-		println 'getData finished'
-		println 'result filename: ${filename}'
+		log.info('getData finished')
+		log.info("result filename: ${filename}")
 
 		return resultFileFullPath
 	} // public boolean getData(c)
@@ -345,10 +345,10 @@ class OmicsoftClinicalDataService extends DataExportService {
 			dataFound = false
 
 
-			log.debug('Clinical Data Query :: ' + sqlQuery.toString())
+			log.info('Clinical Data Query :: ' + sqlQuery.toString())
 			def rows = sql.rows(sqlQuery.toString(), parameterList)
 			if (rows.size() > 0) {
-				log.debug('Writing Clinical File')
+				log.info('Writing Clinical File')
 				writerUtil = new FileWriterUtil(studyDir, fileName, jobName, dataTypeName, dataTypeFolder, separator);
 				writerUtil.writeLine(getColumnNames(retrievalTypes, snpFilesMap,includeParentInfo,includeConceptContext) as String[])
 
@@ -507,7 +507,7 @@ class OmicsoftClinicalDataService extends DataExportService {
 
 	@Transactional(readOnly = true)
 	def exportData(jobDataMap) {
-		println "OmicsoftClinicalDataService.exportData started"
+		log.info("OmicsoftClinicalDataService.exportData started")
 		Map<String, String> exportedFiles = exportDataToFiles(jobDataMap)
 		final String targetFolder = jobDataMap.jobTmpDirectory
 
@@ -529,7 +529,7 @@ class OmicsoftClinicalDataService extends DataExportService {
 
 		clearTempFolder(targetFolder)
 
-		println "OmicsoftClinicalDataService.exportData finished"
+		log.info("OmicsoftClinicalDataService.exportData finished")
 	} // def exportData(jobDataMap) {
 
 
@@ -537,7 +537,7 @@ class OmicsoftClinicalDataService extends DataExportService {
 	    final String tempJobDir
 	) {
 		List files = new File(tempJobDir).list()
-		println 'files count : ${files.size()}'
+		log.info("files count : ${files.size()}")
 
 		files.each { filename ->
 			if ( filename != "subset1" && filename != "subset2" ) {
@@ -608,9 +608,9 @@ class OmicsoftClinicalDataService extends DataExportService {
 								writeClinicalData = true
 							}
 
-							println "selectedFile = $selectedFile"
+							log.info("selectedFile = $selectedFile")
 
-							println 'Working on to export File :: ' + selectedFile
+							log.info('Working on to export File :: ' + selectedFile)
 							def List gplIds = subsetSelectedPlatformsByFiles?.get(subset)?.get(selectedFile)
 							def retVal = null
 							switch (selectedFile)
@@ -709,10 +709,10 @@ class OmicsoftClinicalDataService extends DataExportService {
 									def chromosomes = jobDataMap.get("chroms")
 									def selectedSNPs = jobDataMap.get("selectedSNPs")
 
-									println("VCF Parameters")
-									println("selectedGenes:" + selectedGenes)
-									println("chromosomes:" + chromosomes)
-									println("selectedSNPs:" + selectedSNPs)
+									log.info("VCF Parameters")
+									log.info("selectedGenes:" + selectedGenes)
+									log.info("chromosomes:" + chromosomes)
+									log.info("selectedSNPs:" + selectedSNPs)
 
 
 
@@ -732,9 +732,8 @@ class OmicsoftClinicalDataService extends DataExportService {
 									break;
 							}
 
-							println "retVal:"
-							println retVal
-							println "===================="
+							log.info("retVal: "+retVal)
+							log.info("====================")
 
 						}
 					}
@@ -795,7 +794,7 @@ class OmicsoftClinicalDataService extends DataExportService {
 			throw new Exception(e.message ? e.message : (e.cause?.message ? e.cause?.message : ''), e)
 		} // try
 
-		println "exportData finished"
+		log.info("exportData finished")
 		return resultFilesMap;
 	} // def exportData(jobDataMap) {
 

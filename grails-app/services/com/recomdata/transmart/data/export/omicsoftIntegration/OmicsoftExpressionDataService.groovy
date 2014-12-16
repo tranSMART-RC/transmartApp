@@ -95,7 +95,7 @@ class OmicsoftExpressionDataService {
 
         // Load header data
         log.info("Start header data retrieving query");
-        log.debug("Header query : " + sqlQuery);
+        log.info("Header query : " + sqlQuery);
         rs = stmt.executeQuery();
 
         //def headerMap = [:];
@@ -141,7 +141,7 @@ class OmicsoftExpressionDataService {
 
             // Load sample data
             log.info("Start sample retrieving query");
-            log.debug("Sample Query : " + sampleQuery);
+            log.info("Sample Query : " + sampleQuery);
             rs = stmt1.executeQuery();
 
             tmpString = new StringBuilder();

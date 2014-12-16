@@ -105,6 +105,7 @@ class OmicsoftProjectDataService extends DataExportService {
         )
 
         def subsetDir = targetFolder + File.separator + subset
+        log.info("subsetDir="+subsetDir )
         createDir(subsetDir)
         def convertedClinicalDataFilename = subsetDir + File.separator + convertedClinicalDataDefaultFilename
         DataConvertors.convertClinicalToOmnisoft(clinicalDataFilename, convertedClinicalDataFilename)
@@ -180,7 +181,7 @@ class OmicsoftProjectDataService extends DataExportService {
 
         // Load header data
         log.info("Start header data retrieving query");
-        log.debug("Header query : " + sqlQuery);
+        log.info("Header query : " + sqlQuery);
         rs = stmt.executeQuery();
         //def headerMap = [:];
         StringBuilder headerString = new StringBuilder();
@@ -214,6 +215,7 @@ class OmicsoftProjectDataService extends DataExportService {
         log.info("Finished header data retrieving query");
 
         if (headerString.toString().trim().equals(PROBE_ID)) {
+            log.info("Error:headerString.toString().trim().equals(PROBE_ID)");
             return "fail";
         }
         // Create export file
@@ -238,7 +240,7 @@ class OmicsoftProjectDataService extends DataExportService {
 
         // Load sample data
         log.info("Start sample retrieving query");
-        log.debug("Sample Query : " + sampleQuery);
+        log.info("Sample Query : " + sampleQuery);
         rs = stmt1.executeQuery();
         tmpString = new StringBuilder();
         try {
@@ -255,6 +257,7 @@ class OmicsoftProjectDataService extends DataExportService {
                 prevProbeId = probeId;
             }
         } finally {
+            log.info("Write in file line: "+ prevProbeId + separator + tmpString.toString())
             bw.writeLine(prevProbeId + separator + tmpString.toString());
             bw.flush();
             bw.close();
@@ -268,6 +271,7 @@ class OmicsoftProjectDataService extends DataExportService {
             while (rs.next()) {
                 probeId = rs.getString("PROBE_ID");
                 geneSymbol = rs.getString("GENE_SYMBOL");
+                log.info("Write at platform: "+ probeId + separator + geneSymbol)
                 bwPlatform.writeLine(probeId + separator + geneSymbol);
             }
         } finally {
@@ -453,11 +457,12 @@ class OmicsoftProjectDataService extends DataExportService {
             }
 
             //filename = (studyList?.size() > 1) ? study+'_'+fileName : fileName
-            log.debug("Retrieving Clinical data : " + sqlQuery)
-            log.debug("Retrieving Clinical data : " + parameterList)
+            log.info("Retrieving Clinical data : " + sqlQuery)
+            log.info("Retrieving Clinical data : " + parameterList)
 
             //Only pivot the data if the parameter specifies it.
             if (parPivotData) {
+                log.info("O : " + sqlQuery)
                 boolean mRNAExists = retrievalTypeMRNAExists && null != filesDoneMap['MRNA.TXT'] && filesDoneMap['MRNA.TXT']
                 boolean snpExists = retrievalTypeSNPExists && null != filesDoneMap['SNP.PED, .MAP & .CNV'] && filesDoneMap['SNP.PED, .MAP & .CNV']
                 String filePath = writeData(
@@ -478,12 +483,12 @@ class OmicsoftProjectDataService extends DataExportService {
                 )
                 resultFileFullPath = filePath
             } else {
-                resultFileFullPath = writeData(sqlQuery, parameterList, studyDir, filename, jobName, retrievalTypes, null, includeParentInfo, includeConceptContext)
+                resultFileFullPath = writeData(sqlQuery, parameterList, studyDir, fileName, jobName, retrievalTypes, null, includeParentInfo, includeConceptContext)
             }
         }
         //return dataFound
-        println 'getData finished'
-        println 'result filename: ${filename}'
+        log.info('getData finished')
+        log.info("result filename: ${fileName}")
 
         return resultFileFullPath
     } // public boolean getData(c)
@@ -545,10 +550,11 @@ class OmicsoftProjectDataService extends DataExportService {
             dataFound = false
 
 
-            log.debug('Clinical Data Query :: ' + sqlQuery.toString())
+            log.info('Clinical Data Query :: ' + sqlQuery.toString())
             def rows = sql.rows(sqlQuery.toString(), parameterList)
+            log.info("rows.size()= "+rows.size())
             if (rows.size() > 0) {
-                log.debug('Writing Clinical File')
+                log.info('Writing Clinical File')
                 writerUtil = new FileWriterUtil(studyDir, fileName, jobName, dataTypeName, dataTypeFolder, separator);
                 writerUtil.writeLine(getColumnNames(retrievalTypes, snpFilesMap, includeParentInfo, includeConceptContext) as String[])
                 // String headTypes=""
@@ -557,11 +563,13 @@ class OmicsoftProjectDataService extends DataExportService {
                 // }
                 // headTypes=headTypes-"\t"
                 // writerUtil.writeLine(headTypes.toString())
+
                 rows.each { row ->
                     dataFound = true
                     def values = []
                     //values.add(row.PATIENT_NUM?.toString())
                     // values.add(utilService.getActualPatientId(row.SOURCESYSTEM_CD?.toString()))
+                    log.info("row="+row)
                     values.add(row.SAMPLE_CD?.toString())
                     values.add(row.SUBSET?.toString())
                     values.add(row.CONCEPT_CD?.toString())
@@ -626,13 +634,14 @@ class OmicsoftProjectDataService extends DataExportService {
                 }
             }
             filePath = writerUtil?.outputFile?.getAbsolutePath()
+
         } catch (Exception e) {
             log.info(e.getMessage())
         } finally {
             writerUtil?.finishWriting()
             sql?.close()
         }
-
+        log.info("filePath= "+filePath)
         return filePath
     } // private String writeData
 
@@ -712,7 +721,7 @@ class OmicsoftProjectDataService extends DataExportService {
 
     @Transactional(readOnly = true)
     def exportData(jobDataMap) {
-        println "OmicsoftClinicalDataService.exportData started"
+        log.info("OmicsoftClinicalDataService.exportData started")
         Map<String, String> exportedFiles = exportDataToFiles(jobDataMap)
         final String targetFolder = jobDataMap.jobTmpDirectory
 
@@ -734,7 +743,7 @@ class OmicsoftProjectDataService extends DataExportService {
 
         clearTempFolder(targetFolder)
 
-        println "OmicsoftClinicalDataService.exportData finished"
+        log.info("OmicsoftClinicalDataService.exportData finished")
     } // def exportData(jobDataMap) {
 
 
@@ -742,7 +751,7 @@ class OmicsoftProjectDataService extends DataExportService {
             final String tempJobDir
     ) {
         List files = new File(tempJobDir).list()
-        println 'files count : ${files.size()}'
+        log.info("files count : ${files.size()}")
 
         files.each { filename ->
             if (filename != "subset1" && filename != "subset2") {
@@ -812,9 +821,9 @@ class OmicsoftProjectDataService extends DataExportService {
                                 writeClinicalData = true
                             }
 
-                            println "selectedFile = $selectedFile"
+                            log.info("selectedFile = $selectedFile")
 
-                            println 'Working on to export File :: ' + selectedFile
+                            log.info('Working on to export File :: ' + selectedFile)
                             def List gplIds = subsetSelectedPlatformsByFiles?.get(subset)?.get(selectedFile)
                             def retVal = null
                             switch (selectedFile) {
@@ -909,10 +918,10 @@ class OmicsoftProjectDataService extends DataExportService {
                                     def chromosomes = jobDataMap.get("chroms")
                                     def selectedSNPs = jobDataMap.get("selectedSNPs")
 
-                                    println("VCF Parameters")
-                                    println("selectedGenes:" + selectedGenes)
-                                    println("chromosomes:" + chromosomes)
-                                    println("selectedSNPs:" + selectedSNPs)
+                                    log.info("VCF Parameters")
+                                    log.info("selectedGenes:" + selectedGenes)
+                                    log.info("chromosomes:" + chromosomes)
+                                    log.info("selectedSNPs:" + selectedSNPs)
 
                                     //def IGVFolderLocation = jobTmpDirectory + File.separator + "subset1_${study}" + File.separator + "VCF" + File.separator
 
@@ -930,10 +939,8 @@ class OmicsoftProjectDataService extends DataExportService {
                                     break;
                             }
 
-                            println "retVal:"
-                            println retVal
-                            println "===================="
-
+                            log.info("retVal: "+ retVal)
+                            log.info("====================")
                         }
                     }
 
@@ -989,7 +996,7 @@ class OmicsoftProjectDataService extends DataExportService {
             throw new Exception(e.message ? e.message : (e.cause?.message ? e.cause?.message : ''), e)
         } // try
 
-        println "exportData finished"
+        log.info("exportData finished")
         return resultFilesMap;
     } // def exportData(jobDataMap) {
 
