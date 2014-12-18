@@ -147,7 +147,7 @@ class OmicsoftClinicalDataService extends DataExportService {
 		File studyDir = new File(studyDirName);
 		def sqlQuery = new StringBuilder();
 		def parameterList = null;
-		final String resultFileFullPath// = studyDir + File.separator + fileName;
+		String resultFileFullPath = null// = studyDir + File.separator + fileName;
 
 		boolean retrievalTypeMRNAExists = retrievalTypeExists('MRNA', retrievalTypes)
 		boolean retrievalTypeSNPExists = retrievalTypeExists('SNP', retrievalTypes)
@@ -279,12 +279,13 @@ class OmicsoftClinicalDataService extends DataExportService {
 			}
 			else
 			{
-				resultFileFullPath = writeData(sqlQuery, parameterList, studyDir, filename, jobName, retrievalTypes,null,includeParentInfo,includeConceptContext)
+				resultFileFullPath = writeData(sqlQuery, parameterList, studyDir, fileName, jobName, retrievalTypes,null,includeParentInfo,includeConceptContext)
 			}
 		}
 		//return dataFound
 		log.info('getData finished')
-		log.info("result filename: ${filename}")
+		log.info("getData result filename: ${fileName}")
+		log.info("getData resultFileFullPath: ${resultFileFullPath}")
 
 		return resultFileFullPath
 	} // public boolean getData(c)
@@ -428,7 +429,7 @@ class OmicsoftClinicalDataService extends DataExportService {
 			writerUtil?.finishWriting()
 			sql?.close()
 		}
-
+        log.info("writeData filePath=${filePath}")
 		return filePath
 	} // private String writeData
 

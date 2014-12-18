@@ -105,6 +105,8 @@ class OmicsoftExportController {
         String resultInstanceId = request.getParameter("result_instance_id");
         String subset = request.getParameter("subset_id");
 
+        log.info("doExport ${exportType} ${resultInstanceId} ${subset}")
+
 		response.setContentType("text/json")
 
 
@@ -122,6 +124,7 @@ class OmicsoftExportController {
                 @Override
                 void run() {
                     try {
+                        innerLog.info("async omicsoft export start ${resultInstanceId}")
                         String jobName = "undefined"
                         if (exportType.equals("1")) {      // Clinical
                             jobName = omicsoftClinicalDataService.getClinicalDataByResultInstanceId(resultInstanceId, subset)
@@ -133,6 +136,7 @@ class OmicsoftExportController {
 
                         }
                         innerSession.getAttribute("finishedOmicsoftResultInstances").put(resultInstanceId, jobName)
+                        innerLog.info("async omicsoft export end ${resultInstanceId} ${jobName}")
                     } catch (Exception e) {
                         innerSession.getAttribute("finishedOmicsoftResultInstances").put(resultInstanceId, "fail")
                         innerLog.error("Error exporting data", e)

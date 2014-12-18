@@ -103,6 +103,7 @@ class OmicsoftProjectDataService extends DataExportService {
                 parentConceptCodeList, //new ArrayList(), //parentConceptCodeList as String[], // ArrayList size == 0
                 false //includeConceptContext
         )
+        log.info("clinicalDataFilename=${clinicalDataFilename}")
 
         def subsetDir = targetFolder + File.separator + subset
         log.info("subsetDir="+subsetDir )
@@ -271,7 +272,7 @@ class OmicsoftProjectDataService extends DataExportService {
             while (rs.next()) {
                 probeId = rs.getString("PROBE_ID");
                 geneSymbol = rs.getString("GENE_SYMBOL");
-                log.info("Write at platform: "+ probeId + separator + geneSymbol)
+                //log.info("Write at platform: "+ probeId + separator + geneSymbol)
                 bwPlatform.writeLine(probeId + separator + geneSymbol);
             }
         } finally {
@@ -358,7 +359,7 @@ class OmicsoftProjectDataService extends DataExportService {
         File studyDir = new File(studyDirName);
         def sqlQuery = new StringBuilder();
         def parameterList = null;
-        final String resultFileFullPath// = studyDir + File.separator + fileName;
+        String resultFileFullPath = null// = studyDir + File.separator + fileName;
 
         boolean retrievalTypeMRNAExists = retrievalTypeExists('MRNA', retrievalTypes)
         boolean retrievalTypeSNPExists = retrievalTypeExists('SNP', retrievalTypes)
@@ -489,6 +490,7 @@ class OmicsoftProjectDataService extends DataExportService {
         //return dataFound
         log.info('getData finished')
         log.info("result filename: ${fileName}")
+        log.info("getData resultFileFullPath: ${resultFileFullPath}")
 
         return resultFileFullPath
     } // public boolean getData(c)
@@ -569,7 +571,7 @@ class OmicsoftProjectDataService extends DataExportService {
                     def values = []
                     //values.add(row.PATIENT_NUM?.toString())
                     // values.add(utilService.getActualPatientId(row.SOURCESYSTEM_CD?.toString()))
-                    log.info("row="+row)
+                    //log.info("row="+row)
                     values.add(row.SAMPLE_CD?.toString())
                     values.add(row.SUBSET?.toString())
                     values.add(row.CONCEPT_CD?.toString())
@@ -632,8 +634,10 @@ class OmicsoftProjectDataService extends DataExportService {
 
                     writerUtil.writeLine(values as String[])
                 }
+                log.info('Writing Clinical File end')
             }
             filePath = writerUtil?.outputFile?.getAbsolutePath()
+            log.info("Writing Clinical filePath=${filePath}")
 
         } catch (Exception e) {
             log.info(e.getMessage())
