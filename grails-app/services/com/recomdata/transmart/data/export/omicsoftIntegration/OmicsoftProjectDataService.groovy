@@ -288,26 +288,32 @@ class OmicsoftProjectDataService extends DataExportService {
         try {
             String sourceFilePath = projectConvertorDefaultPath
             String destinationFilePath = subsetDir.toString()
+            log.info("copy from ${sourceFilePath} to ${destinationFilePath}");
             new AntBuilder().copy(todir: destinationFilePath) {
                 fileset(dir: sourceFilePath)
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e)
         }
+        log.info("Finished copy");
+
         /*try {
             def fiii = download("http://www.omicsoft.com/downloads/annotation/__Old/GEO.GPL96.annotation3","/home/transmart/Desktop/vvv.txt")
         } catch(Exception e) {
             log.error(e.getMessage(), e)
         }*/
         String projectFileName = getProjectFileName(studyList.get(0), resultInstanceId)
+        log.info("projectFileName=${projectFileName}")
         try {
-            def creatingProjectFileCommand = Runtime.getRuntime().exec("mono " +
+            String omicsoftExportCmd = "mono " +
                     subsetDir + File.separator + "ProjectConverter.exe -m " +
                     subsetDir + File.separator + convertedExpressionDataDefaultFilename + " " +
                     subsetDir + File.separator + convertedClinicalDataDefaultFilename + " " +
                     subsetDir + File.separator + convertedPlatformDataDefaultFilename + " " +
                     subsetDir + File.separator + metaDataDefaultFilename + " " +
-                    targetFolder + File.separator + projectFileName);
+                    targetFolder + File.separator + projectFileName;
+            log.info("CMD:${omicsoftExportCmd}")
+            def creatingProjectFileCommand = Runtime.getRuntime().exec(omicsoftExportCmd);
             creatingProjectFileCommand.waitFor()                               // Wait for the command to finish
         }
         catch (Exception e) {
