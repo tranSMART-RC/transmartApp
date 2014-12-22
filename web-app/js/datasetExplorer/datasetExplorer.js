@@ -4190,7 +4190,7 @@ function getOmicsoftJobName(resultInstanceId, subset, exportType) {
     function validExportTime() {
         var t2 = new Date().getTime();
         var t1 = checkOmicsoftProjectExportStatusStart.getTime();
-        return parseInt((t2-t1)/(60*1000)) < 20; //20 minutes
+        return parseInt((t2-t1)/(60*1000)) < 1440; //60 minutes * 24
 }
 
 function CheckOmicsoftProjectExportStatus(resultInstanceid, jobType) {
