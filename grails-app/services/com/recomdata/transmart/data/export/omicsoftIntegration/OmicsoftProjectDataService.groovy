@@ -177,7 +177,7 @@ class OmicsoftProjectDataService extends DataExportService {
         annotationStmt.setString(1, resultInstanceId);
         annotationStmt.setFetchSize(fetchSize);
 
-        def sampleType, sampleCD, assayID, GPL_ID, logIntensity, probeId, prevProbeId, samplePlatform, geneSymbol = null;
+        def sampleType, sampleCD, assayID, GPL_ID, logIntensity, probeId, prevProbeId = null, samplePlatform, geneSymbol = null;
         def char separator = '\t';
 
         // Load header data
@@ -285,21 +285,26 @@ class OmicsoftProjectDataService extends DataExportService {
         log.info("Finished sample retrieving query");
         log.info("Finished header data retrieving query");
 
-        def projectConvertorPath = grailsApplication.config.com.recomdata.plugins.projectCoverterPath
-        log.info("projectConvertorPath = ${projectConvertorPath}");
+        def projectConverterPath = grailsApplication.config.com.recomdata.plugins.projectCoverterPath
+        log.info("projectConvertorPath = ${projectConverterPath}");
 
         try {
-            String sourceFilePath = projectConvertorPath ?: projectConvertorDefaultPath
+            String sourceFilePath = projectConverterPath ?: projectConvertorDefaultPath
             String destinationFilePath = subsetDir.toString()
             log.info("copy from ${sourceFilePath} to ${destinationFilePath}");
-            new AntBuilder().copy(todir: destinationFilePath) {
+            File srcDir =  new File(sourceFilePath)
+            File destDir =  new File(destinationFilePath)
+            log.info("srcDir exists: ${srcDir.exists()}, destDir exists: ${destDir.exists()}")
+            FileUtils.copyDirectory(srcDir, destDir)
+            /*new AntBuilder().copy(todir: destinationFilePath) {
                 fileset(dir: sourceFilePath)
-            }
+            }*/
+            log.info("Finished copy");
         } catch (Exception e) {
             log.error(e.getMessage(), e)
         }
-        log.info("Finished copy");
 
+        log.info("Starting converting");
         /*try {
             def fiii = download("http://www.omicsoft.com/downloads/annotation/__Old/GEO.GPL96.annotation3","/home/transmart/Desktop/vvv.txt")
         } catch(Exception e) {
