@@ -285,8 +285,11 @@ class OmicsoftProjectDataService extends DataExportService {
         log.info("Finished sample retrieving query");
         log.info("Finished header data retrieving query");
 
+        def projectConvertorPath = grailsApplication.config.com.recomdata.plugins.projectCoverterPath
+        log.info("projectConvertorPath = ${projectConvertorPath}");
+
         try {
-            String sourceFilePath = projectConvertorDefaultPath
+            String sourceFilePath = projectConvertorPath ?: projectConvertorDefaultPath
             String destinationFilePath = subsetDir.toString()
             log.info("copy from ${sourceFilePath} to ${destinationFilePath}");
             new AntBuilder().copy(todir: destinationFilePath) {
