@@ -4213,9 +4213,37 @@ function CheckOmicsoftProjectExportStatus(resultInstanceid, jobType) {
                     setTimeout(function() {CheckOmicsoftProjectExportStatus(resultInstanceid, jobType);}, 500);
                 } else {
                     var jobName = result.responseText;
-                    if (typeof jobName != 'undefined' && jobName != "" && jobName != "fail") {
+                    if (typeof jobName != 'undefined' || jobName == '') {
+                        switch (jobName) {
+                            case   'fail':
+                                alert('Error while getting job name for omicsoft export.');
+                                break;
+                            case 'No study names found':
+                                alert('No study names found');
+                                break;
+                            case   'Empty clinical data':
+                                alert('Empty clinical data');
+                                break;
+                            case   'Empty data for export file header':
+                                alert('Empty data for export file header');
+                                break;
+                            case   'Empty headerString':
+                                alert('Empty headerString');
+                                break;
+                            case   'Empty samples data':
+                                alert('Empty samples data');
+                                break;
+                            case   'Empty annotation file':
+                                alert('Empty annotation file');
+                                break;
+                            case 'Error copying ProjectConverter.exe':
+                                alert('Error copying ProjectConverter.exe');
+                                break;
+                            default:
+                                doOmicsoftExport(jobName, jobType);
+                                break;
+                        }
                         //alert('jobName = ' + jobName)
-                        doOmicsoftExport(jobName, jobType);
                     } else {
                         alert('Error while getting job name for omicsoft export.');
                     }

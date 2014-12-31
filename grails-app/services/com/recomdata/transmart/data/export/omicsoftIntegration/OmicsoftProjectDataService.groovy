@@ -2,17 +2,12 @@ package com.recomdata.transmart.data.export.omicsoftIntegration
 
 import com.recomdata.dataexport.util.ExportUtil
 import com.recomdata.snp.SnpData
-import com.recomdata.transmart.data.export.ClinicalDataService
 import com.recomdata.transmart.data.export.DataExportService
-import com.recomdata.transmart.data.export.I2b2ExportHelperService
 import com.recomdata.transmart.data.export.exception.DataNotFoundException
-import com.recomdata.transmart.data.export.omicsoftIntegration.util.SqlUtilsService
 import com.recomdata.transmart.data.export.util.FileWriterUtil
-import com.recomdata.transmart.util.UtilService
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang.StringUtils
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.rosuda.REngine.REXP
 import org.rosuda.REngine.Rserve.RConnection
 import org.springframework.transaction.annotation.Transactional
@@ -31,7 +26,7 @@ class OmicsoftProjectDataService extends DataExportService {
     final String clinicalDefaultFilename = 'clinical_i2b2trans' // DO NOT CHANGE!!! HARDCOD UNDER.
     final String clinicalExportJobName = 'omicsoftProjectExport'
     final String convertedClinicalDataDefaultFilename = 'clinical.design.txt'
-    final String projectConvertorDefaultPath = 'lib/ProjectConverter'
+    final String projectConvertorDefaultPath = '/ProjectConverter'
     // consts (end)
 
     // services (start)
@@ -67,7 +62,7 @@ class OmicsoftProjectDataService extends DataExportService {
         String subset = specifySubset(pullOutValue(_subset))
         // managing temp directories
         //def tmpDir = grailsApplication.config.com.recomdata.transmart.data.export.jobTmpDirectory
-        def tmpDir =  grailsApplication.config.com.recomdata.plugins.tempFolderDirectory
+        def tmpDir = grailsApplication.config.com.recomdata.plugins.tempFolderDirectory
         //def tmpDir = grailsApplication.config.com.recomdata.plugins.tempFolderDirectory
         def jobName = sqlUtilsService.generateOmicsoftJobName()
         //'omicsoftExport_' + (new Date().format('yyyy_MM_dd__HH_mm_ss'))
@@ -77,8 +72,10 @@ class OmicsoftProjectDataService extends DataExportService {
         // get study names for provided result_instance_id
         def studyList = i2b2ExportHelperService.findStudyAccessions([resultInstanceId])
 
-        if (studyList.size() == 0)
-            throw new Exception('No study names found for result_instance_id = ${resultInstanceId}')
+        if (studyList.size() == 0) {
+            log.info("No study names found for result_instance_id = ${resultInstanceId}")
+            return 'No study names found'
+        }
 
         def filesDoneMap = [:]
 
@@ -103,15 +100,20 @@ class OmicsoftProjectDataService extends DataExportService {
                 parentConceptCodeList, //new ArrayList(), //parentConceptCodeList as String[], // ArrayList size == 0
                 false //includeConceptContext
         )
+        if (clinicalDataFilename.equals('Empty clinical data')) {
+            log.info("Empty clinical data")
+            return 'Empty clinical data'
+        }
         log.info("clinicalDataFilename=${clinicalDataFilename}")
 
         def subsetDir = targetFolder + File.separator + subset
-        log.info("subsetDir="+subsetDir )
+        log.info("subsetDir=" + subsetDir)
         createDir(subsetDir)
         def convertedClinicalDataFilename = subsetDir + File.separator + convertedClinicalDataDefaultFilename
         DataConvertors.convertClinicalToOmnisoft(clinicalDataFilename, convertedClinicalDataFilename)
+        log.info("convertClinicalToOmnisoft finished")
 
-        def con, stmt, stmt1, annotationStmt, rs, rs1 = null;
+        def con, stmt, stmt1, annotationStmt, rs;
 
         // Grab the connection from the grails object.
         con = dataSource.getConnection();
@@ -191,7 +193,10 @@ class OmicsoftProjectDataService extends DataExportService {
         headerStringPlatform.append(PROBE_ID).append(separator);
         StringBuilder tmpString = new StringBuilder();
 
+        boolean emptyQueryResult
+
         try {
+            emptyQueryResult = true;
             while (rs.next()) {
                 tmpString = new StringBuilder();
                 sampleType = rs.getString("SAMPLE_TYPE");
@@ -203,21 +208,24 @@ class OmicsoftProjectDataService extends DataExportService {
                 tmpString = StringUtils.isNotEmpty(sampleCD) && StringUtils.isNotEmpty(sampleType) && StringUtils.isNotEmpty(GPL_ID) ?
                         tmpString.append(sampleCD).append("_").append(sampleType).append("_").append(GPL_ID) : null;
 
-                if (assayID != null && tmpString != null) {
+                if (assayID != null && tmpString.length() > 0) {
                     //headerMap.put(assayID, tmpString);
                     headerString.append(tmpString).append(separator);
                 }
-
+                emptyQueryResult = false
             }
         } finally {
             rs?.close();
             stmt?.close();
+            if (emptyQueryResult) {
+                return 'Empty data for export file header'
+            }
         }
         log.info("Finished header data retrieving query");
 
         if (headerString.toString().trim().equals(PROBE_ID)) {
             log.info("Error:headerString.toString().trim().equals(PROBE_ID)");
-            return "fail";
+            return "Empty headerString";
         }
         // Create export file
         //String fileSeparator = File.separator;
@@ -244,7 +252,9 @@ class OmicsoftProjectDataService extends DataExportService {
         log.info("Sample Query : " + sampleQuery);
         rs = stmt1.executeQuery();
         tmpString = new StringBuilder();
+
         try {
+            emptyQueryResult = true
             while (rs.next()) {
                 probeId = rs.getString("PROBE_ID");
                 assayID = rs.getString("ASSAY_ID");
@@ -256,9 +266,10 @@ class OmicsoftProjectDataService extends DataExportService {
                 }
                 tmpString.append(logIntensity).append(separator);
                 prevProbeId = probeId;
+                emptyQueryResult = false
             }
         } finally {
-            log.info("Write in file line: "+ prevProbeId + separator + tmpString.toString())
+            log.info("Write in file line: " + prevProbeId + separator + tmpString.toString())
             bw.writeLine(prevProbeId + separator + tmpString.toString());
             bw.flush();
             bw.close();
@@ -266,20 +277,29 @@ class OmicsoftProjectDataService extends DataExportService {
             bwMetadata.close();
             stmt1?.close();
             rs?.close();
+            if (emptyQueryResult) {
+                return 'Empty samples data'
+            }
         }
+
         rs = annotationStmt.executeQuery();
         try {
+            emptyQueryResult = true
             while (rs.next()) {
                 probeId = rs.getString("PROBE_ID");
                 geneSymbol = rs.getString("GENE_SYMBOL");
                 //log.info("Write at platform: "+ probeId + separator + geneSymbol)
                 bwPlatform.writeLine(probeId + separator + geneSymbol);
+                emptyQueryResult = false
             }
         } finally {
             bwPlatform.flush();
             bwPlatform.close();
             rs?.close();
             annotationStmt?.close();
+            if (emptyQueryResult) {
+                return 'Empty annotation file'
+            }
         }
 
         log.info("Finished sample retrieving query");
@@ -289,11 +309,12 @@ class OmicsoftProjectDataService extends DataExportService {
         log.info("projectConvertorPath = ${projectConverterPath}");
 
         try {
-            String sourceFilePath = projectConverterPath ?: projectConvertorDefaultPath
+            String sourceFilePath = projectConverterPath ?:
+                    org.codehaus.groovy.grails.web.context.ServletContextHolder.getServletContext().getRealPath(projectConvertorDefaultPath);
             String destinationFilePath = subsetDir.toString()
             log.info("copy from ${sourceFilePath} to ${destinationFilePath}");
-            File srcDir =  new File(sourceFilePath)
-            File destDir =  new File(destinationFilePath)
+            File srcDir = new File(sourceFilePath)
+            File destDir = new File(destinationFilePath)
             log.info("srcDir exists: ${srcDir.exists()}, destDir exists: ${destDir.exists()}")
             FileUtils.copyDirectory(srcDir, destDir)
             /*new AntBuilder().copy(todir: destinationFilePath) {
@@ -302,6 +323,7 @@ class OmicsoftProjectDataService extends DataExportService {
             log.info("Finished copy");
         } catch (Exception e) {
             log.error(e.getMessage(), e)
+            return "Error copying ProjectConverter.exe"
         }
 
         log.info("Starting converting");
@@ -477,7 +499,6 @@ class OmicsoftProjectDataService extends DataExportService {
 
             //Only pivot the data if the parameter specifies it.
             if (parPivotData) {
-                log.info("O : " + sqlQuery)
                 boolean mRNAExists = retrievalTypeMRNAExists && null != filesDoneMap['MRNA.TXT'] && filesDoneMap['MRNA.TXT']
                 boolean snpExists = retrievalTypeSNPExists && null != filesDoneMap['SNP.PED, .MAP & .CNV'] && filesDoneMap['SNP.PED, .MAP & .CNV']
                 String filePath = writeData(
@@ -489,6 +510,10 @@ class OmicsoftProjectDataService extends DataExportService {
                         retrievalTypes,
                         snpFilesMap
                 )
+                if (filePath.equals('Empty clinical data')) {
+                    log.info("Empty clinical data")
+                    return 'Empty clinical data'
+                }
                 pivotData(
                         (studyList?.size() > 1),
                         study,
@@ -496,9 +521,14 @@ class OmicsoftProjectDataService extends DataExportService {
                         mRNAExists,
                         snpExists
                 )
+                log.info("pivotData finished")
                 resultFileFullPath = filePath
             } else {
                 resultFileFullPath = writeData(sqlQuery, parameterList, studyDir, fileName, jobName, retrievalTypes, null, includeParentInfo, includeConceptContext)
+                if (resultFileFullPath.equals('Empty clinical data')) {
+                    log.info("Empty clinical data")
+                    return 'Empty clinical data'
+                }
             }
         }
         //return dataFound
@@ -522,17 +552,20 @@ class OmicsoftProjectDataService extends DataExportService {
                 REXP x = c.eval(workingDirectoryCommand)
 
                 String rScriptDirectory = config.com.recomdata.transmart.data.export.rScriptDirectory
+                log.info("pivotData rScriptDirectory=${rScriptDirectory}")
                 String compilePivotDataCommand = ''
                 if (mRNAExists) {
                     compilePivotDataCommand = "source('${rScriptDirectory}/PivotData/PivotClinicalDataWithAssays2.R')"
                 } else {
                     compilePivotDataCommand = "source('${rScriptDirectory}/PivotData/PivotClinicalData.R')"
                 }
+                log.info("pivotData compilePivotDataCommand=${compilePivotDataCommand}")
                 REXP comp = c.eval(compilePivotDataCommand)
                 //Prepare command to call the PivotClinicalData.R script
                 String pivotDataCommand = "PivotClinicalData.pivot('$inputFile.name', '$snpExists', '$multipleStudies', '$study')"
                 //, '"+mRNAExists+"','"+snpExists+"'
                 //Run the R command to pivot the data in the clinical.i2b2trans file.
+                log.info("pivotData pivotDataCommand=${pivotDataCommand}")
                 REXP pivot = c.eval(pivotDataCommand)
                 int ii = 0
             }
@@ -565,10 +598,9 @@ class OmicsoftProjectDataService extends DataExportService {
         try {
             dataFound = false
 
-
             log.info('Clinical Data Query :: ' + sqlQuery.toString())
             def rows = sql.rows(sqlQuery.toString(), parameterList)
-            log.info("rows.size()= "+rows.size())
+            log.info("rows.size()= " + rows.size())
             if (rows.size() > 0) {
                 log.info('Writing Clinical File')
                 writerUtil = new FileWriterUtil(studyDir, fileName, jobName, dataTypeName, dataTypeFolder, separator);
@@ -649,17 +681,22 @@ class OmicsoftProjectDataService extends DataExportService {
                     writerUtil.writeLine(values as String[])
                 }
                 log.info('Writing Clinical File end')
+            } else {
+                log.info("Writing Clinical writeData() :: empty clinical data")
+                return 'Empty clinical data'
             }
+
             filePath = writerUtil?.outputFile?.getAbsolutePath()
             log.info("Writing Clinical filePath=${filePath}")
 
         } catch (Exception e) {
             log.info(e.getMessage())
+            throw e
         } finally {
             writerUtil?.finishWriting()
             sql?.close()
         }
-        log.info("filePath= "+filePath)
+        log.info("filePath= " + filePath)
         return filePath
     } // private String writeData
 
@@ -957,7 +994,7 @@ class OmicsoftProjectDataService extends DataExportService {
                                     break;
                             }
 
-                            log.info("retVal: "+ retVal)
+                            log.info("retVal: " + retVal)
                             log.info("====================")
                         }
                     }
