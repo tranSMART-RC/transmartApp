@@ -3983,7 +3983,7 @@ function createOmnisoftExportMenu(subset1DivId, subset2DivId) {
                 id: 'omnisoftExportMenuDivSub1',
                 width: 145,
                 items: [
-                    {
+                  /*  {
                         text: 'Clinical',
                         handler: function () {
                             exportOmnisoftData(1, 1);
@@ -3995,7 +3995,7 @@ function createOmnisoftExportMenu(subset1DivId, subset2DivId) {
                             exportOmnisoftData(1, 2);
                         }
                     },
-                    /*{
+                    {
                         text: 'SNP',
                         handler: function () {
                             exportOmnisoftData(1, 3);
@@ -4032,7 +4032,7 @@ function createOmnisoftExportMenu(subset1DivId, subset2DivId) {
                 id: 'omnisoftExportMenuDivSub2',
                 width: 145,
                 items: [
-                    {
+                 /*   {
                         text: 'Clinical',
                         //href: contact
                         handler: function () {
@@ -4045,7 +4045,7 @@ function createOmnisoftExportMenu(subset1DivId, subset2DivId) {
                             exportOmnisoftData(2, 2);
                         }
                     },
-                    /*{
+                    {
                         text: 'SNP',
                         handler: function () {
                             exportOmnisoftData(2, 3);
