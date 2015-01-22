@@ -334,7 +334,7 @@ class OmicsoftProjectDataService extends DataExportService {
         }*/
         String projectFileName = getProjectFileName(studyList.get(0), resultInstanceId)
         log.info("projectFileName=${projectFileName}")
-        try {
+
             String omicsoftExportCmd = "mono " +
                     subsetDir + File.separator + "ProjectConverter.exe -m " +
                     subsetDir + File.separator + convertedExpressionDataDefaultFilename + " " +
@@ -343,11 +343,27 @@ class OmicsoftProjectDataService extends DataExportService {
                     subsetDir + File.separator + metaDataDefaultFilename + " " +
                     targetFolder + File.separator + projectFileName;
             log.info("CMD:${omicsoftExportCmd}")
-            def creatingProjectFileCommand = Runtime.getRuntime().exec(omicsoftExportCmd);
-            creatingProjectFileCommand.waitFor()                               // Wait for the command to finish
+//            def creatingProjectFileCommand = Runtime.getRuntime().exec(omicsoftExportCmd);
+//            creatingProjectFileCommand.waitFor()                               // Wait for the command to finish
+            String line;
+        try {
+            Process p = Runtime.getRuntime().exec( omicsoftExportCmd);
+
+            BufferedReader inStream = new BufferedReader(
+                    new InputStreamReader(p.getInputStream()) );
+            while ((line = inStream.readLine()) != null) {
+                log.info(line);
+                if (line.contains("Error occured")){
+                    log.error('Exception in data processing in ProjectConverter')
+                    return 'Exception in data processing in ProjectConverter'
+                }
+            }
+            log.info("mono complete");
+            inStream.close();
         }
         catch (Exception e) {
             log.error(e.getMessage(), e)
+            return 'Can not find mono'
         }
         // zip data
         String zipFilename = jobName + '.zip'

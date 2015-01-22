@@ -4221,6 +4221,12 @@ function CheckOmicsoftProjectExportStatus(resultInstanceid, jobType) {
                             case 'No study names found':
                                 alert('No study names found');
                                 break;
+							case 'Can not find mono':
+								alert('Can not find mono');
+								break;
+							case 'Exception in data processing in ProjectConverter':
+								alert('Exception in data processing in ProjectConverter');
+								break;
                             case   'Empty clinical data':
                                 alert('Empty clinical data');
                                 break;
